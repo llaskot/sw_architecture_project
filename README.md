@@ -7,6 +7,7 @@ A clean and modern starter project using **FastAPI**, **Pydantic**, and **uv** f
 
 Before you begin, ensure you have the following installed:
 * **Python 3.13+**
+* **Docker**
 * **uv** (Recommended) — A lightning-fast Python package manager.
 
 ## ⚡ Quick Start (with `uv`)
@@ -70,9 +71,16 @@ python -m venv .venv
 ```
 
 # 3. Install dependencies manually
-```commandline
-pip install "fastapi[standard]" pydantic
+### Installation
+Install all dependencies directly from `pyproject.toml`:
+```bash
+pip install
 ```
 
-# 4. Run the server
+# 4. Build and run Mongo DB in container
+```commandline
+docker-compose up -build
+```
+
+# 5. Run the server
 fastapi dev main.py

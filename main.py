@@ -1,23 +1,25 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-import fastapi
-print(f"Путь к FastAPI: {fastapi.__file__}")
-
-app = FastAPI()
+from app.database import init_db
+from app.users.router import router as users_router
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await init_db()
+    print("DB CONNECTED")
+    yield
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    """
-    this is description
-    """
-    return {"item_id": item_id, "q": q}
+app = FastAPI(lifespan=lifespan)
+app.include_router(users_router)
 
-@app.get("/openapi")
-def openapi():
-    return app.openapi()
+
+# @app.get("/items/{item_id}")
+# def read_item(item_id: int, q: str | None = None):
+#     """
+#     this is description
+#     """
+#     return {"item_id": item_id, "q": q}
