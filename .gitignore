@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Настройки PyCharm (чтобы чужие настройки не перетирали твои)
+.idea/
+
+# Специфические файлы uv (если он их создаст)
+.uv/
+
+# Файлы окружения с секретами (пароли, ключи)
+.env
+.env.*
+
+# Логи (записи об ошибках)
+*.log
