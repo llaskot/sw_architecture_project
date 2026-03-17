@@ -41,6 +41,14 @@ curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | 
    git clone git@github.com:llaskot/sw_architecture_project.git
    cd pashnev_project
    
+# 1.1. Build and run Mongo DB in container
+```commandline
+docker-compose up -build
+```
+   
+# 1.2. Create .env using .env.example as an example
+
+
 # 2. Sync dependencies using uv
 # This creates .venv and installs everything from uv.lock in one go
 ```commandline
@@ -75,11 +83,6 @@ python -m venv .venv
 Install all dependencies directly from `pyproject.toml`:
 ```bash
 pip install
-```
-
-# 4. Build and run Mongo DB in container
-```commandline
-docker-compose up -build
 ```
 
 # 5. Run the server

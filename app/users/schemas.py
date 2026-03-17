@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Union
 
 from beanie import Document, PydanticObjectId, Indexed
 from pydantic import EmailStr, Field, BaseModel
@@ -40,3 +40,15 @@ class UserOut(BaseModel):
         "from_attributes": True,  # Читаем из атрибутов объекта
         "populate_by_name": True  # Если что, ищем по имени
     }
+
+class ConfirmationCode(BaseModel):
+    conf_code: str = Field(min_length=6, max_length=6)
+
+class LoginResponse(BaseModel):
+    user: UserOut
+    access_token: str
+
+class LoginDto(BaseModel):
+    login: Union[EmailStr, str] = Field(..., min_length=5, max_length=50)
+    password: str = Field(..., min_length=6, max_length=50)
+

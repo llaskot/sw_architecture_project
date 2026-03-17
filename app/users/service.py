@@ -1,3 +1,4 @@
+from beanie import PydanticObjectId
 from pymongo.errors import DuplicateKeyError
 
 from app.users.schemas import User, UserCreate
@@ -22,3 +23,13 @@ class UserService:
                 status_code=400,
                 detail=f"Already exists: {key}: {value}"
             )
+
+    @classmethod
+    async def get_user_by_id(cls, user_id: PydanticObjectId):
+        user = await User.get(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="User no found"
+            )
+        return user
