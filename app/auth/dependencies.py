@@ -1,18 +1,17 @@
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 from app.auth.service import AuthService
 from app.users import UserPermissionsDto
 
+security_token = HTTPBearer()
 
-async def get_current_user(request: Request):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    token = auth_header.split(" ")[1]
-
+async def check_token(auth: HTTPAuthorizationCredentials = Depends(security_token)) -> UserPermissionsDto:
+    token = auth.credentials
     payload = AuthService.decode_token(token)
-    if not payload or payload.get("type") != "access":
+    if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+    if not payload.is_active:
+        raise HTTPException(status_code=401, detail="Inactive user")
+    return payload
 
-
-    return UserPermissionsDto(**payload)

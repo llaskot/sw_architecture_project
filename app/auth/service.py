@@ -151,4 +151,3 @@ class AuthService:
         )
         return tokens["access_token"]
 
-
