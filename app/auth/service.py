@@ -11,8 +11,11 @@ from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from pymongo.errors import DuplicateKeyError
 
-from app.users.schemas import UserCreate, ConfirmationCode, User, LoginDto
-from app.users.service import UserService
+from app.auth.schemas import ConfirmationCode, LoginDto
+from app.users import UserCreate, User, get_user_by_id, user_repo
+
+
+# from app.users.service import UserService
 
 
 class AuthService:
@@ -72,39 +75,14 @@ class AuthService:
 
     @staticmethod
     async def create_user(conf_code: ConfirmationCode, encoded_user: str):
-        try:
-            user_dto, code = AuthService._decrypt_registration_data(encoded_user)
-            if conf_code.conf_code != code:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"incorrect confirmation code"
-                )
-            new_user = User(**user_dto.model_dump())  # create model
-            new_user.password = AuthService.get_password_hash(new_user.password)
-            await new_user.insert()
-            return new_user
-
-        except HTTPException as e:
-            raise e
-
-        except DuplicateKeyError as e:
-            details = e.details.get("keyValue", {})
-            key, value = next(iter(details.items()), ("unknown field", "unknown value"))
-
+        user_dto, code = AuthService._decrypt_registration_data(encoded_user)
+        if conf_code.conf_code != code:
             raise HTTPException(
                 status_code=400,
-                detail=f"Already exists: {key}: {value}"
+                detail=f"incorrect confirmation code"
             )
-        except AttributeError as e:
-            raise HTTPException(
-                status_code=403,
-                detail=f"{str(e)}, code is actual for 20 min"
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=str(e)
-            )
+        user_dto.password = AuthService.get_password_hash(user_dto.password)
+        return await user_repo.save_user(user_dto)
 
     @staticmethod
     def create_token(payload: dict):
@@ -131,8 +109,7 @@ class AuthService:
         payload = AuthService.decode_token(refresh_token)
         if payload is None:
             raise HTTPException(status_code=400, detail="Invalid refresh token")
-        return await UserService.get_user_by_id(payload["id"])
-        print(payload)
+        return await get_user_by_id(payload["id"])
 
     @staticmethod
     def get_password_hash(password: str) -> str:
@@ -162,4 +139,3 @@ class AuthService:
                 detail="Incorrect username or password"
             )
         return user
-

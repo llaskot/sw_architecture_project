@@ -1,8 +1,11 @@
 import os
+from typing import Final
+
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-from app.users.schemas import User
+
+from app.users import User
 
 # 1. Загружаем переменные из файла .env в окружение (os.environ)
 load_dotenv()
@@ -10,12 +13,12 @@ load_dotenv()
 
 async def init_db():
 
-    user = os.getenv("MONGO_USER")
-    password = os.getenv("MONGO_PASSWORD")
-    port = os.getenv("MONGO_PORT")
+    USER: Final = os.getenv("MONGO_USER")
+    PASSWORD: Final = os.getenv("MONGO_PASSWORD")
+    PORT: Final = os.getenv("MONGO_PORT")
 
     # mongodb://root:password@localhost:27017
-    database_url = f"mongodb://{user}:{password}@localhost:{port}"
+    database_url = f"mongodb://{USER}:{PASSWORD}@localhost:{PORT}"
 
     client = AsyncIOMotorClient(database_url)
 

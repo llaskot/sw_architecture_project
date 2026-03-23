@@ -43,7 +43,7 @@ curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | 
    
 # 1.1. Build and run Mongo DB in container
 ```commandline
-docker-compose up -build
+docker-compose up --build
 ```
    
 # 1.2. Create .env using .env.example as an example

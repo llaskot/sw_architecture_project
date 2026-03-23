@@ -1,22 +1,8 @@
 from typing import Annotated, Union
 
 from beanie import Document, PydanticObjectId, Indexed
-from pydantic import EmailStr, Field, BaseModel
+from pydantic import EmailStr, Field, BaseModel, field_validator
 
-
-class User(Document):
-    """DB schema"""
-    email: Annotated[EmailStr, Indexed(unique=True)]
-    login: Annotated[str, Indexed(unique=True)]
-    password: str
-    first_name: str
-    last_name: str
-    is_active: bool = True
-    is_admin: bool = False
-    is_manager: bool = False
-
-    class Settings:
-        name = "users"
 
 class UserCreate(BaseModel):
     """Registration scheme"""
@@ -26,7 +12,8 @@ class UserCreate(BaseModel):
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
 
-class UserOut(BaseModel):
+
+class UserResponse(BaseModel):
     """Response schema"""
     id: PydanticObjectId
     email: EmailStr
@@ -41,14 +28,20 @@ class UserOut(BaseModel):
         "populate_by_name": True  # Если что, ищем по имени
     }
 
-class ConfirmationCode(BaseModel):
-    conf_code: str = Field(min_length=6, max_length=6)
 
-class LoginResponse(BaseModel):
-    user: UserOut
-    access_token: str
+class UserPermissionsDto(BaseModel):
+    id: str
+    is_active: bool
+    is_admin: bool
+    is_manager: bool
 
-class LoginDto(BaseModel):
-    login: Union[EmailStr, str] = Field(..., min_length=5, max_length=50)
-    password: str = Field(..., min_length=6, max_length=50)
+    @field_validator("id", mode="before")
+    @classmethod
+    def serialize_id(cls, v):
+        # Если пришел ObjectId, превращаем в строку, иначе оставляем как есть
+        return str(v) if v else v
 
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }

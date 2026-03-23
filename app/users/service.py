@@ -1,7 +1,8 @@
 from beanie import PydanticObjectId
 from pymongo.errors import DuplicateKeyError
 
-from app.users.schemas import User, UserCreate
+from app.users import User
+from app.users.schemas import  UserCreate
 from fastapi import HTTPException
 
 
@@ -30,6 +31,6 @@ class UserService:
         if not user:
             raise HTTPException(
                 status_code=404,
-                detail="User no found"
+                detail="User not found"
             )
         return user
