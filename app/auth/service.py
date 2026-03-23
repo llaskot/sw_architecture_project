@@ -4,27 +4,27 @@ import hashlib
 import os
 import secrets
 import time
+from typing import Final
 
 import bcrypt
 import jwt
+from beanie import PydanticObjectId
 from cryptography.fernet import Fernet
-from fastapi import HTTPException
-from pymongo.errors import DuplicateKeyError
+from fastapi import HTTPException, Response
 
 from app.auth.schemas import ConfirmationCode, LoginDto
-from app.users import UserCreate, User, get_user_by_id, user_repo
-
-
-# from app.users.service import UserService
+from app.users import UserCreate, User, get_user_by_id, user_repo, UserPermissionsDto
 
 
 class AuthService:
     _generated_key = None
+    ENV_PASSPHRASE: Final = os.getenv("SECRET_KEY")
+    REFRESH_AGE: Final = 48 * 60 * 60
 
     @classmethod
     def _get_generated_key(cls):
         if cls._generated_key is None:
-            passphrase = os.getenv("SECRET_KEY")
+            passphrase = cls.ENV_PASSPHRASE
             if not passphrase:
                 raise ValueError("AUTH_SECRET_KEY not found in environment variables")
             key_hash = hashlib.sha256(passphrase.encode()).digest()
@@ -89,16 +89,16 @@ class AuthService:
         key = os.getenv("JWT_SOLT")
         payload["exp"] = int(time.time()) + (10 * 60)
         access = jwt.encode(payload, key, algorithm="HS256")
-        payload["exp"] = int(time.time()) + (48 * 60 * 60)
+        payload["exp"] = int(time.time()) + AuthService.REFRESH_AGE
         refresh = jwt.encode(payload, key, algorithm="HS256")
         return {"access_token": access, "refresh_token": refresh}
 
     @staticmethod
-    def decode_token(token: str):
+    def decode_token(token: str) -> UserPermissionsDto | None:
         key = os.getenv("JWT_SOLT")
         try:
             payload = jwt.decode(token, key, algorithms=["HS256"])
-            return payload
+            return UserPermissionsDto.model_validate(payload)
         except jwt.ExpiredSignatureError:
             return None
         except jwt.InvalidTokenError:
@@ -107,9 +107,10 @@ class AuthService:
     @staticmethod
     async def refresh(refresh_token: str):
         payload = AuthService.decode_token(refresh_token)
+
         if payload is None:
             raise HTTPException(status_code=400, detail="Invalid refresh token")
-        return await get_user_by_id(payload["id"])
+        return await get_user_by_id(PydanticObjectId(payload.id))
 
     @staticmethod
     def get_password_hash(password: str) -> str:
@@ -127,15 +128,27 @@ class AuthService:
 
     @staticmethod
     async def login_user(data: LoginDto) -> User:
-        user = await User.find_one({
-            "$or": [
-                {"email": data.login},
-                {"login": data.login}
-            ]
-        })
+        user = await user_repo.find_for_logining(data)
         if not user or not AuthService.verify_password(data.password, user.password):
             raise HTTPException(
                 status_code=403,
                 detail="Incorrect username or password"
             )
         return user
+
+    @staticmethod
+    def prepare_tokens(user: User, response: Response):
+        permissions = UserPermissionsDto.model_validate(user)
+        user_payload = permissions.model_dump()
+        tokens = AuthService.create_token(user_payload)
+        response.set_cookie(
+            key="refresh_token",
+            value=tokens["refresh_token"],
+            httponly=True,
+            samesite="lax",
+            path="/auth/refresh",
+            max_age=AuthService.REFRESH_AGE
+        )
+        return tokens["access_token"]
+
+

@@ -1,8 +1,9 @@
 from beanie import PydanticObjectId
 from pymongo.errors import DuplicateKeyError
 
-from app.users import User
-from app.users.schemas import  UserCreate
+from app.users.repository import user_repo
+from app.users.user_model import User
+from app.users.schemas import UserCreate
 from fastapi import HTTPException
 
 
@@ -27,7 +28,7 @@ class UserService:
 
     @classmethod
     async def get_user_by_id(cls, user_id: PydanticObjectId):
-        user = await User.get(user_id)
+        user = await user_repo.get_user_by_id(user_id)
         if not user:
             raise HTTPException(
                 status_code=404,

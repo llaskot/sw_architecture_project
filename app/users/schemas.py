@@ -13,11 +13,13 @@ class UserCreate(BaseModel):
     last_name: str = Field(..., min_length=1)
 
 
-class UserResponse(BaseModel):
+
+
+
+
+class UserResponseBasic(BaseModel):
     """Response schema"""
     id: PydanticObjectId
-    email: EmailStr
-    login: str
     first_name: str
     last_name: str
     is_active: bool
@@ -28,6 +30,10 @@ class UserResponse(BaseModel):
         "populate_by_name": True  # Если что, ищем по имени
     }
 
+class UserResponse(UserResponseBasic):
+    """Полный вариант: всё то же самое + конфиденциальные данные"""
+    email: EmailStr
+    login: str
 
 class UserPermissionsDto(BaseModel):
     id: str

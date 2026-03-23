@@ -1,4 +1,3 @@
-import logging
 from typing import Final
 
 from fastapi import HTTPException
@@ -9,8 +8,8 @@ from app.auth.schemas import LoginResponse, ConfirmationCode, LoginDto
 from app.auth.service import AuthService
 from app.users import UserCreate, User, UserPermissionsDto
 
-router = APIRouter(prefix="/auth", tags=["Users"])
-REFRESH_AGE: Final = 48 * 60 * 60
+router = APIRouter(prefix="/auth", tags=["Authentification"])
+
 
 
 @router.post("/register")
@@ -38,7 +37,7 @@ async def save_user(data: ConfirmationCode,
 
     try:
         user = await AuthService.create_user(data, register_token)
-        access_token = prepare_tokens(user, response)
+        access_token = AuthService.prepare_tokens(user, response)
         return {"user": user, "access_token": access_token}
     except HTTPException as e:
         raise e from e
@@ -60,7 +59,7 @@ async def refresh(request: Request,
     refresh_token = request.cookies.get("refresh_token")
     try:
         user = await AuthService.refresh(refresh_token)
-        access_token = prepare_tokens(user, response)
+        access_token = AuthService.prepare_tokens(user, response)
         return {"access_token": access_token}
     except HTTPException as e:
         raise e from e
@@ -75,7 +74,7 @@ async def login(data: LoginDto,
                 response: Response):
     try:
         user = await AuthService.login_user(data)
-        access_token = prepare_tokens(user, response)
+        access_token = AuthService.prepare_tokens(user, response)
         return {"user": user, "access_token": access_token}
     except HTTPException as e:
         raise e from e
@@ -85,17 +84,13 @@ async def login(data: LoginDto,
         raise HTTPException(status_code=500, detail=f"Server error: \n{str(e)}") from e
 
 
-def prepare_tokens(user: User, response: Response):
-    permissions = UserPermissionsDto.model_validate(user)
-    user_payload = permissions.model_dump()
-    tokens = AuthService.create_token(user_payload)
-    response.set_cookie(
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(
         key="refresh_token",
-        value=tokens["refresh_token"],
-        httponly=True,
-        samesite="lax",
         path="/auth/refresh",
-        max_age=REFRESH_AGE
+        httponly=True,
+        samesite="lax"
     )
-    return tokens["access_token"]
+    return {"detail": "Successfully logged out"}
 
