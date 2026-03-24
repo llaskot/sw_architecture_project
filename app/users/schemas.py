@@ -1,6 +1,5 @@
-from typing import Annotated, Union
 
-from beanie import Document, PydanticObjectId, Indexed
+from beanie import  PydanticObjectId
 from pydantic import EmailStr, Field, BaseModel, field_validator
 
 

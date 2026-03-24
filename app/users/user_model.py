@@ -1,7 +1,7 @@
-from typing import Annotated, Union
+from typing import Annotated
 
-from beanie import Document, PydanticObjectId, Indexed
-from pydantic import EmailStr, Field, BaseModel
+from beanie import Document, Indexed
+from pydantic import EmailStr
 
 
 class User(Document):
