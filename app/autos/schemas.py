@@ -1,18 +1,18 @@
 from pydantic import BaseModel, Field, ConfigDict
 from beanie import PydanticObjectId, Link
-from typing import Annotated
+from typing import Annotated, Optional
 
 from app.auto_models import AutoModel
 
 
 class CarCreate(BaseModel):
     # Связь с моделью
-    model_id: Link[AutoModel]
+    model_id: PydanticObjectId
 
 
-    brand_name: str = Field(..., min_length=1)
-    model_name: str = Field(..., min_length=1)
-    category: str
+    brand_name: Optional[str] = "AAAAAA"
+    model_name: Optional[str] = "AAAAAA"
+    category: Optional[str] = "AAAAAA"
 
     # Идентификация
     vin: str = Field(..., min_length=17, max_length=17)

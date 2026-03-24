@@ -31,5 +31,5 @@ class AutoModelRepository:
         return mod
 
 
-user_repo = AutoModelRepository(AutoModel)
+auto_model_repo = AutoModelRepository(AutoModel)
 

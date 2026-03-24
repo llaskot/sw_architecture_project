@@ -31,4 +31,4 @@ class AutoModelRepository:
     #     return mod
 
 
-user_repo = AutoModelRepository(Car)
+car_repo = AutoModelRepository(Car)

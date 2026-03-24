@@ -23,4 +23,4 @@ class BrandRepository:
 
 
 
-user_repo = BrandRepository(Brand)
+brand_repo = BrandRepository(Brand)
