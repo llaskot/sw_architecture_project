@@ -8,6 +8,7 @@ from beanie import init_beanie
 from app.auto_models import AutoModel
 from app.autos import Car
 from app.brands import Brand
+from app.rents import Rent
 from app.users import User
 
 # 1. Загружаем переменные из файла .env в окружение (os.environ)
@@ -28,5 +29,5 @@ async def init_db():
     await init_beanie(
         # database=cast(AsyncDatabase, cast(object, client.rents_db)),
         database=client.rents_db,
-        document_models=[User, AutoModel, Brand, Car]
+        document_models=[User, AutoModel, Brand, Car, Rent]
     )

@@ -10,12 +10,14 @@ from app.auto_models import auto_model_repo
 from app.autos.schemas import CarCreate
 from app.brands import brand_repo
 from app.autos import Car, CarService
-# Импортируй свои модели и репозиторий
 from app.brands import Brand
 from app.auto_models.auto_model_model import AutoModel
 from app.auto_models.schemas import AutoModelCreate, CarCategory
 from app.autos import CarService
 from app.brands.schemas import BrandCreate
+from app.rents import rent_repo
+from app.rents.schemas import RentCreate
+from app.rents.tent_model import Rent
 from app.users import user_repo, UserCreate, User
 
 fake = Faker()
@@ -23,11 +25,13 @@ fake = Faker()
 async def seed(iterations: int = 5):
     # 1. Подключаемся к локальной Монге
     client = AsyncIOMotorClient("mongodb://root:supersecretpassword@localhost:27017/?authSource=admin")
-    await init_beanie(database=client.rents_db, document_models=[Brand, AutoModel, Car, User])
+    await init_beanie(database=client.rents_db, document_models=[Brand, AutoModel, Car, User, Rent])
 
     model_rep = auto_model_repo
     brand_rep = brand_repo
     user_rep = user_repo
+    rent_rep = rent_repo
+
 
     for _ in range(iterations):
         user_dto = UserCreate(
@@ -72,6 +76,15 @@ async def seed(iterations: int = 5):
 
         car = await CarService.create_car(car_dto)
         print(car)
+
+        rent_dto = RentCreate(
+            client = new_user.id,
+            car = car.id,
+            user_dock = "".join(random.choices(string.ascii_uppercase + string.digits, k=8)),
+            days_qty = random.randint(2, 60),
+        )
+        new_rent = await rent_repo.save_rent(rent_dto)
+        print(new_rent)
 
 
 
