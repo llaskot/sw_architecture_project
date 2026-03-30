@@ -12,6 +12,6 @@ async def check_token(auth: HTTPAuthorizationCredentials = Depends(security_toke
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     if not payload.is_active:
-        raise HTTPException(status_code=401, detail="Inactive user")
+        raise HTTPException(status_code=403, detail="Inactive user")
     return payload
 
