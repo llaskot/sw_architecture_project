@@ -7,6 +7,15 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "abstractservice"
+version = "0.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/81/84841d2e23c4d480c73ccccc444545fcc1632ac9f240d188dbaa56e22b68/abstractservice-0.0.1.tar.gz", hash = "sha256:71d1ded647d437b401cab9732f432c878145ea4395003cdf4b877608a7b8f8de", size = 1339, upload-time = "2026-01-25T15:58:05.593Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5f/d3/fabd069abd6f6daab5e018df7334db2fc1d7cef090fe95a2bd1585c882c5/abstractservice-0.0.1-py3-none-any.whl", hash = "sha256:ad33f4e228afc8a4121767c0ccae613b20a958e96f4dd4cfe7a8ed52d8f11120", size = 1572, upload-time = "2026-01-25T15:58:04.146Z" },
+]
+
+[[package]]
 name = "annotated-doc"
 version = "0.0.4"
 source = { registry = "https://pypi.org/simple" }
@@ -582,6 +591,7 @@ name = "pashnev-project"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "abstractservice" },
     { name = "bcrypt" },
     { name = "beanie" },
     { name = "cryptography" },
@@ -596,6 +606,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "abstractservice" },
     { name = "bcrypt", specifier = ">=5.0.0" },
     { name = "beanie", specifier = ">=2.0.1" },
     { name = "cryptography", specifier = ">=46.0.5" },

@@ -50,7 +50,7 @@ async def seed(iterations: int = 5):
             description=fake.sentence(nb_words=10)
         )
 
-        new_brand = await brand_rep.save_brand(brand_dto)
+        new_brand = await brand_rep.create(brand_dto)
         print(new_brand)
 
 
@@ -60,7 +60,7 @@ async def seed(iterations: int = 5):
             description="High quality vehicle with " + fake.bs(),
             category=random.choice(list(CarCategory))
         )
-        new_model = await model_rep.save_auto_model(dto)
+        new_model = await model_rep.create(dto)
         print(new_model)
 
         car_dto = CarCreate(

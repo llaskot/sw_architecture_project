@@ -7,7 +7,7 @@ from app.autos.schemas import CarCreate
 class CarService:
     @staticmethod
     async def create_car(dto: CarCreate) -> Car:
-        auto_model = await auto_model_repo.get_model_by_id(dto.model_id)
+        auto_model = await auto_model_repo.get_by_id(dto.model_id)
         # Merging DTO data with model info
         car_data = dto.model_dump()
         car_data.update({

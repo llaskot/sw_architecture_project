@@ -1,6 +1,6 @@
-from typing import Generic, TypeVar, Type, List, Optional
+from typing import Generic, TypeVar, Type, List, Optional, Any
 
-from beanie import PydanticObjectId, Document
+from beanie import PydanticObjectId, Document, Link
 from beanie.odm.operators.update.general import Set
 from pydantic import BaseModel
 
@@ -18,13 +18,30 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
     async def create(self, create_dto: CreateSchema) -> T:
         new_item: Brand = self.model(**create_dto.model_dump())
         await new_item.insert()
-        return new_item
+        return await self.fetch_links(new_item)
 
     async def get_all(self) -> list[T]:
-        return await self.model.find_all().to_list()
+        items = await self.model.find_all().to_list()
+        for i in range(len(items)):
+            items[i] = await self.fetch_links(items[i])
+        return items
+
+    async def fetch_links(self, item: T) -> T:
+        if not item:
+            return item
+        for field in item.model_fields.keys():
+            value = getattr(item, field)
+            if isinstance(value, Link):
+                ref_id = value.ref.id
+                ref_model = value.document_class
+                linked_doc = await ref_model.get(ref_id)
+                setattr(item, field, linked_doc)
+        return item
+
 
     async def get_by_id(self, item_id: PydanticObjectId) -> Optional[T]:
-        return await self.model.get(item_id)
+        res =  await self.model.get(item_id)
+        return await self.fetch_links(res)
 
     async def update(self, item_id: PydanticObjectId, update_dto: UpdateSchema) -> Optional[T]:
         update_data = update_dto.model_dump(exclude_unset=True)
@@ -32,7 +49,9 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
             Set(update_data),
             response_type=self.model
         )
-        return updated_item
+        return await self.fetch_links(updated_item)
 
     async def delete(self, item_id: PydanticObjectId):
         return await self.model.find_one(self.model.id == item_id).delete()
+
+
