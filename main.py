@@ -8,6 +8,7 @@ from app.users.router import router as users_router
 from app.auth.router import router as auth_router
 from app.brands.router import router as brand_router
 from app.auto_models import auto_models_router
+from app.autos import car_router
 
 
 
@@ -43,6 +44,7 @@ app.include_router(auth_router)
 app.include_router(brand_router)
 
 app.include_router(auto_models_router)
+app.include_router(car_router)
 
 
 # @app.get("/items/{item_id}")
