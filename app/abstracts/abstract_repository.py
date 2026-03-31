@@ -22,6 +22,7 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
 
     async def get_all(self) -> list[T]:
         items = await self.model.find_all().to_list()
+        print("AAAAAAAAAAAA",items)
         for i in range(len(items)):
             items[i] = await self.fetch_links(items[i])
         return items

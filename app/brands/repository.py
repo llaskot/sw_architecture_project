@@ -1,10 +1,9 @@
-from app.auto_models.schemas import AutoModelCreate
 from app.brands import Brand
 from app.abstracts.abstract_repository import AbstractRepository
 from app.brands.schemas import BrandCreate, BrandUpdate
 
 
-class BrandRepository(AbstractRepository[Brand, AutoModelCreate, BrandUpdate]):
+class BrandRepository(AbstractRepository[Brand, BrandCreate, BrandUpdate]):
     def __init__(self):
         # Передаем саму модель Brand в конструктор родителя
         super().__init__(Brand)

@@ -1,41 +1,38 @@
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Response, Request, HTTPException
 
-from app.brands import Brand
-from app.brands.schemas import BrandCreate, BrandUpdate
-from app.brands.service import BrandService
+from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate
+from app.auto_models.service import AutoModelService
 
-# def get_brand_service():
-#     return BrandService()
 
-router = APIRouter(prefix="/brand", tags=["Brand"])
+router = APIRouter(prefix="/models", tags=["Auto Model"])
 
 @router.post("/")
-async def create_brand(brand_data: BrandCreate, response: Response):
-    service = BrandService()
+async def create_model(model_data: AutoModelCreate, response: Response):
+    service = AutoModelService()
     try:
-        return await service.create(brand_data)
+        return await service.create(model_data)
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.patch("/{brand_id}")
-async def update_brand(brand_id: PydanticObjectId, brand_data: BrandUpdate, response: Response):
-    service = BrandService()
+@router.patch("/{model_id}")
+async def update_model(model_id: PydanticObjectId, model_data: AutoModelUpdate, response: Response):
+    service = AutoModelService()
     try:
-        return await service.update(brand_id, brand_data)
+        return await service.update(model_id, model_data)
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-@router.get("/{brand_id}")
-async def get_by_id(brand_id: PydanticObjectId):
-    service = BrandService()
+@router.get("/{model_id}")
+async def get_by_id(model_id: PydanticObjectId):
+    service = AutoModelService()
     try:
-        return await service.get_by_id(brand_id)
+        return await service.get_by_id(model_id)
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:
@@ -43,7 +40,7 @@ async def get_by_id(brand_id: PydanticObjectId):
 
 @router.get("/")
 async def get_all():
-    service = BrandService()
+    service = AutoModelService()
     try:
         return await service.get_all()
     except HTTPException as http_ex:
@@ -51,11 +48,11 @@ async def get_all():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-@router.delete("/{brand_id}")
-async def delete(brand_id: PydanticObjectId):
-    service = BrandService()
+@router.delete("/{model_id}")
+async def delete(model_id: PydanticObjectId):
+    service = AutoModelService()
     try:
-        return await service.delete(brand_id)
+        return await service.delete(model_id)
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:
