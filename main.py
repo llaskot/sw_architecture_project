@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
-# from app.users.router import router as users_router
+from app.users.router import router as users_router
 # from app.auth.router import router as auth_router
 from app.brands.router import router as brand_router
 from app.database import client, setup_db
@@ -40,7 +40,9 @@ async def error_logging_middleware(request: Request, call_next):
     except Exception as e:
         logging.error(f"Error handling request {request.url.path}: {e}", exc_info=True)
         raise e from None
-# app.include_router(users_router)
+
+
+app.include_router(users_router)
 # app.include_router(auth_router)
 
 app.include_router(brand_router)
@@ -48,10 +50,3 @@ app.include_router(brand_router)
 app.include_router(auto_models_router)
 app.include_router(car_router)
 
-
-# @app.get("/items/{item_id}")
-# def read_item(item_id: int, q: str | None = None):
-#     """
-#     this is description
-#     """
-#     return {"item_id": item_id, "q": q}

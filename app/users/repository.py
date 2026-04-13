@@ -29,3 +29,16 @@
 #
 #
 # user_repo = UserRepository(User)
+from app.abstracts import AbstractRepository
+from app.database import db
+from app.users.schemas import UserCreate, UserUpdate
+from app.users.user_model import User
+
+
+class UserRepository(AbstractRepository[User, UserCreate, UserUpdate]):
+    def __init__(self, db):
+        super().__init__(User, db["users"])
+
+
+
+user_repo = UserRepository(db)

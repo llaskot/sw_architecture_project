@@ -1,19 +1,36 @@
-# from beanie import PydanticObjectId
-# from fastapi import APIRouter, HTTPException, Depends
-# from pymongo.errors import PyMongoError
+
+from fastapi import APIRouter, HTTPException
+from pymongo.errors import DuplicateKeyError, PyMongoError
+
+from app.users.schemas import UserCreate, UserResponseAdm, UserUpdate
+from app.users.service import UserService
+
+router = APIRouter(prefix="/users", tags=["Users"])
+
+@router.post("/", response_model=UserResponseAdm)
+async def create_user(user_data: UserCreate):
+    service = UserService()
+    try:
+        return await service.create(user_data)
+    except HTTPException as http_ex:
+        raise http_ex
+    except DuplicateKeyError as e:
+        raise HTTPException(status_code=409, detail=f"Duplicate value for field: {e.details['keyPattern']}") from e
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 #
-# from app.auth.dependencies import check_token
-# from app.users import UserPermissionsDto
-# from app.users.schemas import UserCreate, UserResponse, UserResponseBasic
-# from app.users.service import UserService
 #
-# router = APIRouter(prefix="/users", tags=["Users"])
-#
-#
-# # @router.get("/")
-# # def get_users():
-# #     return [{"username": "hacker grandma"}]
-#
+@router.get("/", response_model=list[UserResponseAdm])
+async def get_all():
+    service = UserService()
+    try:
+        return await service.get_all()
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
 # @router.get("/profile", response_model=UserResponse)
 # async def get_profile(user: UserPermissionsDto = Depends(check_token)):
 #     try:
@@ -26,13 +43,38 @@
 #         raise HTTPException(status_code=500, detail=f"Server error: \n{str(e)}") from e
 #
 #
-# @router.get("/{user_id}", response_model=UserResponseBasic)
-# async def get_user(user_id: PydanticObjectId):
-#     try:
-#         return await UserService.get_user_by_id(user_id)
-#     except HTTPException as e:
-#         raise e from e
-#     except Exception as e:
-#         if isinstance(e, PyMongoError):
-#             raise HTTPException(status_code=500, detail=f"Database error:\n {str(e)}") from e
-#         raise HTTPException(status_code=500, detail=f"Server error: \n{str(e)}") from e
+@router.get("/{user_id}", response_model=UserResponseAdm)
+async def get_user(user_id: str):
+    service = UserService()
+    try:
+        return await service.get_by_id(user_id)
+    except HTTPException as e:
+        raise e from e
+    except Exception as e:
+        if isinstance(e, PyMongoError):
+            raise HTTPException(status_code=500, detail=f"Database error:\n {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Server error: \n{str(e)}") from e
+
+
+@router.patch("/{user_id}", response_model=UserResponseAdm)
+async def update_user(user_id: str, user_data: UserUpdate):
+    service = UserService()
+    try:
+        return await service.update(user_id, user_data)
+    except HTTPException as http_ex:
+        raise http_ex
+    except DuplicateKeyError as e:
+        raise HTTPException(status_code=409, detail=f"Duplicate value for field: {e.details['keyPattern']}") from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.delete("/{user_id}")
+async def delete(user_id: str):
+    service = UserService()
+    try:
+        return await service.delete(user_id)
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
