@@ -1,24 +1,17 @@
-from typing import Annotated
+from typing import  Optional
 
-from beanie import Document, Indexed, PydanticObjectId, Link
-from pydantic import EmailStr
-
-from app.auto_models import AutoModel
+from bson import ObjectId
+from pydantic import  BaseModel, Field, ConfigDict, field_serializer
 
 
-class Car(Document):
+class Car(BaseModel):
     """Specific vehicle instance (the 'iron')"""
-
-    model_id: Link[AutoModel]
-
-    # Denormalization
-    brand_name: str
-    model_name: str
-    category: str
+    id: Optional[ObjectId] = Field(None, alias="_id")
+    model_id: ObjectId = Field(..., description="Reference to auto_model collection")
 
     # Identification
-    vin: Annotated[str, Indexed(unique=True)]  # Unique vehicle ID
-    plate_number: Annotated[str, Indexed(unique=True)]  # License plate
+    vin: str  # Unique vehicle ID
+    plate_number: str  # License plate
 
     # Characteristics
     year: int  # Production year
@@ -30,5 +23,14 @@ class Car(Document):
     available: bool = True
     in_use: bool = False
 
-    class Settings:
-        name = "cars"
+    active: bool = True
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        populate_by_name=True
+    )
+
+    @field_serializer("id", "model_id")
+    def serialize_id(self, v: ObjectId, _info):
+        return str(v) if v else None
+

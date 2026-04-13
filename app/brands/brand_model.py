@@ -1,12 +1,22 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
-from beanie import Document, Indexed
 
-class Brand(Document):
-    """DB schema"""
-    name: Annotated[str, Indexed(unique=True)]
+from pydantic import BaseModel, Field, ConfigDict
+from pydantic import Field, field_serializer
+from bson import ObjectId
+
+class Brand(BaseModel):
+    id: Optional[ObjectId] = Field(None, alias="_id")
+    name: str
     country: str
     description: str
+    active: bool = True
 
-    class Settings:
-        name = "brand"
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        populate_by_name=True
+    )
+
+    @field_serializer("id")
+    def serialize_id(self, v: ObjectId, _info):
+        return str(v) if v else None

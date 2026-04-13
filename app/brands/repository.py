@@ -1,14 +1,14 @@
+
 from app.brands import Brand
 from app.abstracts.abstract_repository import AbstractRepository
 from app.brands.schemas import BrandCreate, BrandUpdate
+from app.database import db
 
 
 class BrandRepository(AbstractRepository[Brand, BrandCreate, BrandUpdate]):
-    def __init__(self):
+    def __init__(self, db):
         # Передаем саму модель Brand в конструктор родителя
-        super().__init__(Brand)
+        super().__init__(Brand, db["brand"])
 
-    # async def get_by_name(self, name: str) -> Optional[Brand]:
-    #     return await self.model.find_one({"name": name})
 
-brand_repo = BrandRepository()
+brand_repo = BrandRepository(db)
