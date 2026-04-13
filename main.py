@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 
 from app.users.router import router as users_router
-# from app.auth.router import router as auth_router
+from app.auth.router import router as auth_router
 from app.brands.router import router as brand_router
 from app.database import client, setup_db
 from app.auto_models import auto_models_router
@@ -43,7 +43,7 @@ async def error_logging_middleware(request: Request, call_next):
 
 
 app.include_router(users_router)
-# app.include_router(auth_router)
+app.include_router(auth_router)
 
 app.include_router(brand_router)
 

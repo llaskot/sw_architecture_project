@@ -11,9 +11,18 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=6)
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
-    active: bool
-    is_admin: bool
-    is_manager: bool
+    active: bool = True
+    is_admin: bool = False
+    is_manager: bool = False
+
+class UserRegistrate(BaseModel):
+    """Registration user info scheme"""
+    email: EmailStr  # Авто-валидация формата почты
+    login: str = Field(..., min_length=6, max_length=20)
+    password: str = Field(..., min_length=6)
+    first_name: str = Field(..., min_length=1)
+    last_name: str = Field(..., min_length=1)
+
 
 
 class UserUpdate(BaseModel):
@@ -51,19 +60,19 @@ class UserResponseAdm(BaseModel):
 #     email: EmailStr
 #     login: str
 #
-# class UserPermissionsDto(BaseModel):
-#     id: str
-#     is_active: bool
-#     is_admin: bool
-#     is_manager: bool
-#
-#     @field_validator("id", mode="before")
-#     @classmethod
-#     def serialize_id(cls, v):
-#         # Если пришел ObjectId, превращаем в строку, иначе оставляем как есть
-#         return str(v) if v else v
-#
-#     model_config = {
-#         "from_attributes": True,
-#         "populate_by_name": True
-#     }
+class UserPermissionsDto(BaseModel):
+    id: str
+    active: bool
+    is_admin: bool
+    is_manager: bool
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def serialize_id(cls, v):
+        # Если пришел ObjectId, превращаем в строку, иначе оставляем как есть
+        return str(v) if v else v
+
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }
