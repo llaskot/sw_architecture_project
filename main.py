@@ -9,6 +9,7 @@ from app.brands.router import router as brand_router
 from app.database import client, setup_db
 from app.auto_models import auto_models_router
 from app.autos import car_router
+from app.rents.router import router as rent_router
 
 
 logging.basicConfig(
@@ -49,4 +50,6 @@ app.include_router(brand_router)
 
 app.include_router(auto_models_router)
 app.include_router(car_router)
+
+app.include_router(rent_router)
 

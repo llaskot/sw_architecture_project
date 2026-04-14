@@ -17,11 +17,6 @@ from app.users.repository import user_repo
 from app.users.schemas import UserRegistrate, UserCreate, UserPermissionsDto
 from app.users.user_model import User
 
-
-# from app.auth.schemas import ConfirmationCode, LoginDto
-# from app.users import UserCreate, User, get_user_by_id, user_repo, UserPermissionsDto
-#
-#
 class AuthService:
     def __init__(self):
         self._generated_key = None
