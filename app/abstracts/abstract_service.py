@@ -13,10 +13,12 @@ class AbstractService(Generic[CreateSchemaType, UpdateSchemaType]):
         self.repo = repository
 
     async def create(self, data: CreateSchemaType):
+        await self.check(data)
         return await self.repo.create(data)
 
 
     async def update(self, item_id: str | ObjectId, data: UpdateSchemaType,  hide_inactive: bool = None ):
+        await self.check(data)
         if isinstance(item_id, str):
             try:
                 item_id = ObjectId(item_id)
@@ -53,3 +55,6 @@ class AbstractService(Generic[CreateSchemaType, UpdateSchemaType]):
         if not success:
             raise HTTPException(status_code=404, detail="Item not found")
         return {"success": True}
+
+    async def check(self, data: CreateSchemaType | UpdateSchemaType):
+        pass

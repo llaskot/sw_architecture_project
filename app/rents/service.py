@@ -37,3 +37,9 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         rent = await rent_repo.create(rent)
         return rent
 
+
+
+    # async def check(self, data: RentCreate | RentUpdate):
+    #     car = await self.car_repo.get_by_id(data.car_id)
+    #     if not car or not car.active:
+    #         raise HTTPException(status_code=404, detail="Car not found")
