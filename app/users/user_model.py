@@ -2,11 +2,12 @@ from typing import Annotated, Optional
 
 from bson import ObjectId
 from pydantic import EmailStr, BaseModel, ConfigDict, field_serializer, Field
+from pydantic_mongo import ObjectIdField
 
 
 class User(BaseModel):
     """DB schema"""
-    id: Optional[ObjectId] = Field(None, alias="_id")
+    id: Optional[ObjectIdField] = Field(None, alias="_id")
     email: EmailStr
     login: str
     password: str
@@ -21,8 +22,8 @@ class User(BaseModel):
         populate_by_name=True
     )
 
-    @field_serializer("id")
-    def serialize_id(self, v: ObjectId, _info):
-        return str(v) if v else None
+    # @field_serializer("id")
+    # def serialize_id(self, v: ObjectId, _info):
+    #     return str(v) if v else None
 
 

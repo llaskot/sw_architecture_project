@@ -6,24 +6,25 @@ from bson import ObjectId
 from pydantic import BaseModel, Field, BeforeValidator, WithJsonSchema, ConfigDict, field_serializer, field_validator
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import CoreSchema
+from pydantic_mongo import ObjectIdField
 
 from app.autos.schemas import CarRead
 from app.rents.rent_model import Rent, RentStage
 from app.users.user_model import User
 
-PyObjectID = Annotated[
-    ObjectId,
-    BeforeValidator(lambda x: ObjectId(x) if ObjectId.is_valid(str(x)) else x),
-    WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
-]
+# PyObjectID = Annotated[
+#     ObjectId,
+#     BeforeValidator(lambda x: ObjectId(x) if ObjectId.is_valid(str(x)) else x),
+#     WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
+# ]
 
 
 
 
 class RentRequest(BaseModel):
     """Request rent schema"""
-    car_id: PyObjectID = Field(..., description="Exists car id")
-    client_id: PyObjectID = Field(..., description="exists user id")
+    car_id: ObjectIdField = Field(..., description="Exists car id")
+    client_id: ObjectIdField = Field(..., description="exists user id")
     driver: Optional[bool] = Field(False, description="driver required")
     user_dock: str
     start_date: datetime
@@ -46,7 +47,7 @@ class RentCreate(RentRequest):
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_by: Optional[PyObjectID] = Field(None, description="Reference to user collection")
+    updated_by: Optional[ObjectIdField] = Field(None, description="Reference to user collection")
     stage: RentStage = RentStage.ORDERED
     comment: Optional[str] = Field(None, description="Manager Comment")
     total_price: float
@@ -55,8 +56,8 @@ class RentCreate(RentRequest):
 
 class RentUpdate(BaseModel):
     """Create rent schema"""
-    car_id: PyObjectID = Field(..., description="Exists car id")
-    client_id: PyObjectID = Field(..., description="exists user id")
+    car_id: ObjectIdField = Field(..., description="Exists car id")
+    client_id: ObjectIdField = Field(..., description="exists user id")
     driver: Optional[bool] = Field(False, description="driver required")
     user_dock: str
     start_date: datetime
@@ -72,10 +73,13 @@ class RentUpdate(BaseModel):
 
 class RentRead(Rent):
     # Твои вложенные (можешь раскукожить, если надо)
-    car: CarRead | None = None
+    id: ObjectIdField = Field(alias="_id")
+    car_id: ObjectIdField
+    client_id: ObjectIdField
+    # car: CarRead | None = None
     client: User | None = None
 
-    @field_serializer("id", "car_id", "client_id", "updated_by", check_fields=False)
-    def serialize_id(self, v: Any, _info):
-        return str(v) if v else None
+    # @field_serializer("id", "car_id", "client_id", "updated_by", check_fields=False)
+    # def serialize_id(self, v: Any, _info):
+    #     return str(v) if v else None
 

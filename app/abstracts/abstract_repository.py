@@ -22,7 +22,7 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
         self.read_pipeline = None
 
     async def create(self, create_dto: CreateSchema) -> T:
-        new_item = create_dto.model_dump()
+        new_item = create_dto.model_dump(mode='python', by_alias=True)
         new_item['active'] = True
         res = await self.collection.insert_one(new_item)
         new_item["_id"] = res.inserted_id
