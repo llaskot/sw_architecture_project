@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional, Annotated
+from typing import Optional, Annotated, Any
 
 from bson import ObjectId
-from pydantic import BaseModel, Field, BeforeValidator, WithJsonSchema, ConfigDict, field_serializer
+from pydantic import BaseModel, Field, BeforeValidator, WithJsonSchema, ConfigDict, field_serializer, field_validator
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import CoreSchema
 
 from app.autos.schemas import CarRead
-from app.rents.rent_model import Rent
+from app.rents.rent_model import Rent, RentStage
 from app.users.user_model import User
 
 PyObjectID = Annotated[
@@ -18,8 +20,8 @@ PyObjectID = Annotated[
 
 
 
-class RentCreate(BaseModel):
-    """Create rent schema"""
+class RentRequest(BaseModel):
+    """Request rent schema"""
     car_id: PyObjectID = Field(..., description="Exists car id")
     client_id: PyObjectID = Field(..., description="exists user id")
     driver: Optional[bool] = Field(False, description="driver required")
@@ -36,6 +38,20 @@ class RentCreate(BaseModel):
     # @field_serializer("car_id", 'client_id')
     # def serialize_id(self, v: ObjectId, _info):
     #     return str(v) if v else None
+
+
+
+class RentCreate(RentRequest):
+    """Create rent schema"""
+
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_by: Optional[PyObjectID] = Field(None, description="Reference to user collection")
+    stage: RentStage = RentStage.ORDERED
+    comment: Optional[str] = Field(None, description="Manager Comment")
+    total_price: float
+    active: bool = True
+
 
 class RentUpdate(BaseModel):
     """Create rent schema"""
@@ -52,14 +68,14 @@ class RentUpdate(BaseModel):
         arbitrary_types_allowed=True
     )
 
-    # @field_serializer("car_id", 'client_id')
-    # def serialize_id(self, v: ObjectId, _info):
-    #     return str(v) if v else None
 
 
 class RentRead(Rent):
+    # Твои вложенные (можешь раскукожить, если надо)
     car: CarRead | None = None
     client: User | None = None
-    @field_serializer("id", "car_id", 'client_id', 'updated_by')
-    def serialize_id(self, v: ObjectId, _info):
+
+    @field_serializer("id", "car_id", "client_id", "updated_by", check_fields=False)
+    def serialize_id(self, v: Any, _info):
         return str(v) if v else None
+

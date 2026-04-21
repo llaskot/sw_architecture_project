@@ -3,13 +3,14 @@ from pymongo.errors import DuplicateKeyError
 
 from app.brands.schemas import BrandUpdate, BrandCreate
 from app.brands.service import BrandService
-from app.rents.schemas import RentCreate, RentRead
+from app.rents.schemas import RentCreate, RentRead, RentRequest
 from app.rents.service import RentService
 
 router = APIRouter(prefix="/rent", tags=["Rents"])
 
-@router.post("/", response_model=RentRead)
-async def create_rent(rent_data: RentCreate, response: Response):
+@router.post("/",
+             )
+async def create_rent(rent_data: RentRequest, response: Response):
     service = RentService()
     try:
         return await service.create(rent_data)
@@ -34,7 +35,9 @@ async def create_rent(rent_data: RentCreate, response: Response):
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e)) from e
 #
-@router.get("/{rent_id}")
+@router.get("/{rent_id}",
+            response_model=RentRead
+            )
 async def get_by_id(rent_id: str):
     service = RentService()
     try:
@@ -44,15 +47,15 @@ async def get_by_id(rent_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 #
-# @router.get("/")
-# async def get_all():
-#     service = BrandService()
-#     try:
-#         return await service.get_all()
-#     except HTTPException as http_ex:
-#         raise http_ex
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e)) from e
+@router.get("/")
+async def get_all():
+    service = RentService()
+    try:
+        return await service.get_all()
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 #
 # @router.delete("/{brand_id}")
 # async def delete(brand_id: str):
@@ -63,3 +66,5 @@ async def get_by_id(rent_id: str):
 #         raise http_ex
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e)) from e
+
+

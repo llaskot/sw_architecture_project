@@ -48,7 +48,6 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
         match_stage = {"$match": {"_id": item_id}}
         if hide_inactive:
             match_stage["$match"]["active"] = True
-
         if pipeline:
             # Если нашли пайплайн в наследнике — ебашим агрегацию
             cursor = self.collection.aggregate([match_stage] + pipeline)

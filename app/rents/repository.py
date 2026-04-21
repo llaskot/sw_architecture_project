@@ -34,6 +34,14 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
                 }
             },
             {
+                "$lookup": {
+                    "from": "cars",
+                    "localField": "car_id",
+                    "foreignField": "_id",
+                    "as": "car"
+                }
+            },
+            {
                 "$unwind": {
                     "path": "$car",
                     "preserveNullAndEmptyArrays": True

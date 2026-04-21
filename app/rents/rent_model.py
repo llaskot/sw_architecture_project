@@ -48,6 +48,6 @@ class Rent(BaseModel):
         arbitrary_types_allowed=True
     )
 
-    # @field_serializer("id", "car_id", 'client_id', 'updated_by')
-    # def serialize_id(self, v: ObjectId, _info):
-    #     return str(v) if v else None
+    @field_serializer("id", "car_id", 'client_id', 'updated_by')
+    def serialize_id(self, v: ObjectId, _info):
+        return str(v) if v else None

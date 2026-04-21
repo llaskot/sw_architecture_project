@@ -45,11 +45,11 @@ async def error_logging_middleware(request: Request, call_next):
 
 app.include_router(users_router)
 app.include_router(auth_router)
-
+#
 app.include_router(brand_router)
-
+#
 app.include_router(auto_models_router)
 app.include_router(car_router)
-
+#
 app.include_router(rent_router)
 
