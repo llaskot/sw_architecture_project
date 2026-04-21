@@ -30,6 +30,8 @@ class Rent(BaseModel):
     updated_by: Optional[ObjectIdField] = Field(None, description="Reference to user collection")
     stage: RentStage = RentStage.ORDERED
     comment: Optional[str] = Field(None, description="Manager Comment")
+    end_date: datetime = Field(..., description="Last rent day")
+
 
 
     user_dock: str

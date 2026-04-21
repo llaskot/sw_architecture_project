@@ -3,7 +3,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.brands.schemas import BrandUpdate, BrandCreate
 from app.brands.service import BrandService
-from app.rents.schemas import RentCreate, RentRead, RentRequest
+from app.rents.schemas import RentCreate, RentRead, RentRequest, RentUpdateRequest
 from app.rents.service import RentService
 
 router = APIRouter(prefix="/rent", tags=["Rents"])
@@ -21,20 +21,20 @@ async def create_rent(rent_data: RentRequest, response: Response):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e)) from e
-#
-#
-# @router.patch("/{brand_id}")
-# async def update_brand(brand_id: str, brand_data: BrandUpdate, response: Response):
-#     service = BrandService()
-#     try:
-#         return await service.update(brand_id, brand_data)
-#     except HTTPException as http_ex:
-#         raise http_ex
-#     except DuplicateKeyError as e:
-#         raise HTTPException(status_code=409, detail='DuplicateFieldError') from e
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e)) from e
-#
+
+
+@router.patch("/{rent_id}")
+async def update_rent(rent_id: str, rent_data: RentUpdateRequest, response: Response):
+    service = RentService()
+    try:
+        return await service.update(rent_id, rent_data)
+    except HTTPException as http_ex:
+        raise http_ex
+    except DuplicateKeyError as e:
+        raise HTTPException(status_code=409, detail='DuplicateFieldError') from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
 @router.get("/{rent_id}",
             response_model=RentRead
             )

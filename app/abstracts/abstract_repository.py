@@ -67,8 +67,11 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
             query["active"] = True
         else:
             query["active"] = hide_inactive
-        update_data = update_dto.model_dump(exclude_unset=True, mode='python', by_alias=True)
-        print(query)
+        update_data = update_dto.model_dump(exclude_unset=True,
+                                            # exclude_none=True,
+                                            mode='python',
+                                            by_alias=True)
+        print('QQQQQQQQQQQ',query)
         updated_item = await self.collection.find_one_and_update(
             query,
             {"$set": update_data},  # Оператор $set обновляет только указанные поля

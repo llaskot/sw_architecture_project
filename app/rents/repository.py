@@ -1,3 +1,8 @@
+from datetime import datetime, timezone
+from typing import Any
+
+from bson import ObjectId
+
 from app.abstracts import AbstractRepository
 from app.database import db
 from app.rents.rent_model import Rent
@@ -94,8 +99,17 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
             }
         ]
 
-
-
+    async def get_by_car_id(self, car_id: ObjectId) -> Any:
+        now = datetime.now(timezone.utc)
+        match_stage = {"$match": {
+            "car_id": car_id,
+            "active": True,
+            "end_date": {"$gt": now}
+        }}
+        cursor = self.collection.find(match_stage["$match"])
+        documents = await cursor.to_list(length=None)
+        if not documents or len(documents) == 0: return None
+        return [self.model.model_validate(doc) for doc in documents]
 
 
 rent_repo = RentRepository(db)

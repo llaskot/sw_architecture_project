@@ -28,15 +28,9 @@ class RentRequest(BaseModel):
         arbitrary_types_allowed=True
     )
 
-    # @field_serializer("car_id", 'client_id')
-    # def serialize_id(self, v: ObjectId, _info):
-    #     return str(v) if v else None
-
-
-
 class RentCreate(RentRequest):
     """Create rent schema"""
-
+    end_date: datetime = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_by: Optional[ObjectIdField] = Field(None, description="Reference to user collection")
@@ -46,14 +40,14 @@ class RentCreate(RentRequest):
     active: bool = True
 
 
-class RentUpdate(BaseModel):
-    """Create rent schema"""
-    car_id: ObjectIdField = Field(..., description="Exists car id")
-    client_id: ObjectIdField = Field(..., description="exists user id")
-    driver: Optional[bool] = Field(False, description="driver required")
-    user_dock: str
-    start_date: datetime
-    days_qty: int = Field(1, description="rent length")
+class RentUpdateRequest(BaseModel):
+    """Request rent schema"""
+    car_id: Optional[ObjectIdField] = Field(None, description="Exists car id")
+    client_id: Optional[ObjectIdField] = Field(None, description="exists user id")
+    driver: Optional[bool] = Field(None, description="driver required")
+    user_dock: Optional[str] = Field(None, description="user dock")
+    start_date: Optional[datetime] = Field(None, description="start rent date")
+    days_qty: Optional[int] = Field(None, ge=1, description="rent length")
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -62,10 +56,18 @@ class RentUpdate(BaseModel):
     )
 
 
+class RentUpdate(RentUpdateRequest):
+    """Create rent schema"""
+    end_date: Optional[datetime] = Field(None, description="New end date")
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_by: Optional[ObjectIdField] = Field(None, description="Reference to user collection")
+    total_price: Optional[float] = Field(None, description="Total price")
+
+
+
+
 
 class RentRead(Rent):
-    # Твои вложенные (можешь раскукожить, если надо)
-
     car: CarRead | None = None
     client: User | None = None
 
