@@ -2,12 +2,14 @@ from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict, BeforeValidator, WithJsonSchema
 from typing import Annotated, Optional
 
+from pydantic_mongo import ObjectIdField
+
 from app.auto_models.schemas import AutoModelRead
 from app.autos import Car
 
 ModelID = Annotated[
-    ObjectId,
-    BeforeValidator(lambda x: ObjectId(x) if ObjectId.is_valid(str(x)) else x),
+    ObjectIdField,
+    BeforeValidator(lambda x: ObjectIdField(x) if ObjectIdField.is_valid(str(x)) else x),
     WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
 ]
 

@@ -4,13 +4,14 @@ from typing import Optional, Annotated
 from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, BeforeValidator, WithJsonSchema
 from pydantic import Field
+from pydantic_mongo import ObjectIdField
 
 from app.auto_models.auto_model_model import CarCategory, AutoModel
 from app.brands import Brand
 
 BrandID = Annotated[
-    ObjectId,
-    BeforeValidator(lambda x: ObjectId(x) if ObjectId.is_valid(str(x)) else x),
+    ObjectIdField,
+    BeforeValidator(lambda x: ObjectIdField(x) if ObjectIdField.is_valid(str(x)) else x),
     WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
 ]
 

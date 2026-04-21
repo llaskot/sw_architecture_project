@@ -16,11 +16,6 @@ class RentStage(str, Enum):
     INPROCESS = "rented"
     CLOSED = "closed"
 
-# ObjectIdField = Annotated[
-#     ObjectId,
-#     BeforeValidator(lambda x: ObjectId(x) if ObjectId.is_valid(str(x)) else x),
-#     WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
-# ]
 
 
 class Rent(BaseModel):
@@ -48,7 +43,3 @@ class Rent(BaseModel):
         from_attributes=True,
         arbitrary_types_allowed=True
     )
-    # 
-    # @field_serializer("id", "car_id", 'client_id', 'updated_by')
-    # def serialize_id(self, v: ObjectId, _info):
-    #     return str(v) if v else None

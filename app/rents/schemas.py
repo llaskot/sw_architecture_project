@@ -1,22 +1,14 @@
 from datetime import datetime, timezone
-from enum import Enum
-from typing import Optional, Annotated, Any
+from typing import Optional
 
-from bson import ObjectId
-from pydantic import BaseModel, Field, BeforeValidator, WithJsonSchema, ConfigDict, field_serializer, field_validator
-from pydantic.json_schema import JsonSchemaValue
-from pydantic_core import CoreSchema
+from pydantic import BaseModel, Field,  ConfigDict
 from pydantic_mongo import ObjectIdField
 
 from app.autos.schemas import CarRead
 from app.rents.rent_model import Rent, RentStage
 from app.users.user_model import User
 
-# PyObjectID = Annotated[
-#     ObjectId,
-#     BeforeValidator(lambda x: ObjectId(x) if ObjectId.is_valid(str(x)) else x),
-#     WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
-# ]
+
 
 
 
@@ -73,13 +65,7 @@ class RentUpdate(BaseModel):
 
 class RentRead(Rent):
     # Твои вложенные (можешь раскукожить, если надо)
-    id: ObjectIdField = Field(alias="_id")
-    car_id: ObjectIdField
-    client_id: ObjectIdField
-    # car: CarRead | None = None
-    client: User | None = None
 
-    # @field_serializer("id", "car_id", "client_id", "updated_by", check_fields=False)
-    # def serialize_id(self, v: Any, _info):
-    #     return str(v) if v else None
+    car: CarRead | None = None
+    client: User | None = None
 

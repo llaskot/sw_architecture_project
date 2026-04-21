@@ -67,7 +67,7 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
             query["active"] = True
         else:
             query["active"] = hide_inactive
-        update_data = update_dto.model_dump(exclude_unset=True)
+        update_data = update_dto.model_dump(exclude_unset=True, mode='python', by_alias=True)
         print(query)
         updated_item = await self.collection.find_one_and_update(
             query,

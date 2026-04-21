@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Annotated, Optional
 
-from bson import ObjectId
 from pydantic import BaseModel, field_serializer, ConfigDict, Field
+from pydantic_mongo import ObjectIdField
 
 from app.brands.brand_model import Brand
 
@@ -17,8 +17,8 @@ class CarCategory(str, Enum):
 
 class AutoModel(BaseModel):
     """DB schema"""
-    id: Optional[ObjectId] = Field(None, alias="_id")
-    brand_id: ObjectId = Field(..., description="Reference to Brand collection")
+    id: Optional[ObjectIdField] = Field(None, alias="_id")
+    brand_id: ObjectIdField = Field(..., description="Reference to Brand collection")
     name: str
     description: str
     category: CarCategory
@@ -27,9 +27,9 @@ class AutoModel(BaseModel):
         arbitrary_types_allowed=True,
         populate_by_name=True
     )
-
-    @field_serializer("id", "brand_id")
-    def serialize_id(self, v: ObjectId, _info):
-        return str(v) if v else None
+    #
+    # @field_serializer("id", "brand_id")
+    # def serialize_id(self, v: ObjectId, _info):
+    #     return str(v) if v else None
 
 

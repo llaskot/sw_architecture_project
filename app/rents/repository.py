@@ -96,67 +96,6 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
 
 
 
-        # self.read_pipeline = [
-        #     # Достаем car
-        #     {
-        #         "$lookup": {
-        #             "from": "car",
-        #             "localField": "car_id",
-        #             "foreignField": "_id",
-        #             "as": "car"
-        #         }
-        #     },
-        #     {
-        #         "$unwind": {
-        #             "path": "$car",
-        #             "preserveNullAndEmptyArrays": True
-        #         }
-        #     },
-        #
-        #     # 1. Достаем модель
-        #     {
-        #         "$lookup": {
-        #             "from": "auto_model",
-        #             "localField": "car.model_id",
-        #             "foreignField": "_id",
-        #             "as": "car.model"
-        #         }
-        #     },
-        #     # 2. Разворачиваем
-        #     {
-        #         "$unwind": {
-        #             "path": "$car.model",
-        #             "preserveNullAndEmptyArrays": True
-        #         }
-        #     },
-        #     # 3. Джоиним бренд (БЕЗ удаления модели перед этим!)
-        #     {
-        #         "$lookup": {
-        #             "from": "brand",
-        #             "localField": "car.model.brand_id",
-        #             "foreignField": "_id",
-        #             "as": "car.model.brand"
-        #         }
-        #     },
-        #     {
-        #         "$unwind": {
-        #             "path": "$car.model.brand",
-        #             "preserveNullAndEmptyArrays": True
-        #         }
-        #     },
-        #     # 4. ФИНАЛЬНАЯ ОЧИСТКА (делаем один раз в самом конце)
-        #     {
-        #         "$addFields": {
-        #             "car": {
-        #                 "$cond": [
-        #                     {"$ifNull": ["$car._id", False]},
-        #                     "$car",
-        #                     "$$REMOVE"
-        #                 ]
-        #             }
-        #         }
-        #     }
-        # ]
 
 
 rent_repo = RentRepository(db)
