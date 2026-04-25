@@ -1,9 +1,13 @@
+from enum import Enum
+
 from bson import ObjectId
+from fastapi import Query
 from pydantic import BaseModel, Field, ConfigDict, BeforeValidator, WithJsonSchema
 from typing import Annotated, Optional
 
 from pydantic_mongo import ObjectIdField
 
+from app.auto_models.auto_model_model import CarCategory
 from app.auto_models.schemas import AutoModelRead
 from app.autos import Car
 
@@ -59,3 +63,15 @@ class CarUpdate(BaseModel):
 
 class CarRead(Car):
     model: AutoModelRead | None = None
+
+
+class SortOrder(str, Enum):
+    ASC = "asc"
+    DESC = "desc"
+    NONE = 'none'
+
+class AllCarsResponse(BaseModel):
+    total: int
+    page: int
+    limit: int
+    items: list[CarRead]

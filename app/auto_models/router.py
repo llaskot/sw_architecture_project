@@ -9,7 +9,15 @@ from app.auto_models.service import AutoModelService
 #
 #
 router = APIRouter(prefix="/models", tags=["Auto Model"])
-
+@router.get("/categories")
+async def get_categories():
+    service = AutoModelService()
+    try:
+        return await service.get_categories()
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 @router.post("/")
 async def create_model(model_data: AutoModelCreate, response: Response):
     service = AutoModelService()
@@ -65,3 +73,5 @@ async def delete(model_id: str):
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+

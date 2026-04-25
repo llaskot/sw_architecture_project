@@ -71,7 +71,6 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
                                             # exclude_none=True,
                                             mode='python',
                                             by_alias=True)
-        print('QQQQQQQQQQQ',query)
         updated_item = await self.collection.find_one_and_update(
             query,
             {"$set": update_data},  # Оператор $set обновляет только указанные поля
@@ -87,5 +86,8 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
             active=False,
         )
         return await self.update(item_id, dto, hide_inactive=True)
+
+    async def get_unic(self, field_name):
+        return await self.collection.distinct(field_name)
 
 

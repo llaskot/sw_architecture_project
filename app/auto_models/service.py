@@ -2,6 +2,7 @@ from fastapi import HTTPException
 
 from app.abstracts import AbstractService
 from app.auto_models import auto_model_repo
+from app.auto_models.auto_model_model import CarCategory
 from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate
 from app.brands import brand_repo
 
@@ -15,3 +16,6 @@ class AutoModelService(AbstractService[AutoModelCreate, AutoModelUpdate]):
         brand = await self.brand_repo.get_by_id(data.brand_id)
         if not brand or not brand.active:
             raise HTTPException(status_code=404, detail="Brand not found")
+
+    async def get_categories(self):
+        return [category.value for category in CarCategory]

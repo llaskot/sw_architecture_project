@@ -61,3 +61,5 @@ async def delete(brand_id: str):
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+

@@ -9,16 +9,16 @@ from pydantic_mongo import ObjectIdField
 from app.auto_models.auto_model_model import CarCategory, AutoModel
 from app.brands import Brand
 
-BrandID = Annotated[
-    ObjectIdField,
-    BeforeValidator(lambda x: ObjectIdField(x) if ObjectIdField.is_valid(str(x)) else x),
-    WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
-]
+# BrandID = Annotated[
+#     ObjectIdField,
+#     BeforeValidator(lambda x: ObjectIdField(x) if ObjectIdField.is_valid(str(x)) else x),
+#     WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
+# ]
 
 
 class AutoModelCreate(BaseModel):
     """Registration scheme"""
-    brand_id: BrandID = Field(..., description="Exists brand ID")
+    brand_id: ObjectIdField = Field(..., description="Exists brand ID")
     name: str = Field(..., min_length=1)
     description: str = Field(..., min_length=6)
     # category: CarCategory = Field(..., description="Category of the car")
@@ -31,7 +31,7 @@ class AutoModelCreate(BaseModel):
 
 class AutoModelUpdate(BaseModel):
     """Update scheme"""
-    brand_id: Optional[BrandID] = Field(None, description="exists brand ID")
+    brand_id: Optional[ObjectIdField] = Field(None, description="exists brand ID")
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str] = Field(None, min_length=6)
     category: Optional[CarCategory] = Field(
