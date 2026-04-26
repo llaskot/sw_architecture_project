@@ -47,9 +47,9 @@ class CarUpdate(BaseModel):
     plate_number: Optional[str] = Field(None, min_length=4)
 
     # Характеристики
-    year: int = Field(None, ge=1900, le=2222)
-    color: str = Field(None, min_length=2)
-    mileage: int = Field(None, ge=0)
+    year: Optional[int] = Field(None, ge=1900, le=2222)
+    color: Optional[str] = Field(None, min_length=2)
+    mileage: Optional[int] = Field(None, ge=0)
 
     # Бизнес-логика
     price_per_day: Optional[float] = Field(None)

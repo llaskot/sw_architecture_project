@@ -56,15 +56,15 @@ async def get_all():
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-#
-# @router.delete("/{brand_id}")
-# async def delete(brand_id: str):
-#     service = BrandService()
-#     try:
-#         return await service.delete(brand_id)
-#     except HTTPException as http_ex:
-#         raise http_ex
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e)) from e
+
+@router.delete("/{rent_id}")
+async def delete(rent_id: str):
+    service = RentService()
+    try:
+        return await service.delete_rent(rent_id)
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 

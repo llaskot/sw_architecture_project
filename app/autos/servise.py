@@ -12,6 +12,8 @@ class CarService(AbstractService[CarCreate, CarUpdate]):
         self.model_repo = auto_model_repo
 
     async def check(self, data: CarCreate | CarUpdate):
+        if not data.model_id:
+            return
         model = await self.model_repo.get_by_id(data.model_id)
         if not model or not model.active:
             raise HTTPException(status_code=404, detail="Car model not found")

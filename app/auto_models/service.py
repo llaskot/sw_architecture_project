@@ -13,6 +13,8 @@ class AutoModelService(AbstractService[AutoModelCreate, AutoModelUpdate]):
         self.brand_repo = brand_repo
 
     async def check(self, data: AutoModelCreate | AutoModelUpdate):
+        if not data.brand_id:
+            return
         brand = await self.brand_repo.get_by_id(data.brand_id)
         if not brand or not brand.active:
             raise HTTPException(status_code=404, detail="Brand not found")

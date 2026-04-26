@@ -84,6 +84,7 @@ async def get_all(
         sort_model: SortOrder = SortOrder.ASC,
         hide_inactive: Annotated[bool, Query(
                 description="For Admins only")] = True,
+
         page: int = 1,
         limit: int = 10,
 ) -> AllCarsResponse:

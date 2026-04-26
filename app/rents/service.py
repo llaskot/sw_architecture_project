@@ -49,11 +49,9 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         updated_rent = RentUpdate(
             **rent_req_dto.model_dump(),
         )
-
         if updated_rent.start_date or updated_rent.days_qty:
             updated_rent.end_date = ((rent_req_dto.start_date or rent.start_date) +
                                      timedelta(days=(rent_req_dto.days_qty or rent.days_qty)))
-
         new_car = None
         old_car_id = rent.car_id
         if rent_req_dto.car_id and rent.car_id != rent_req_dto.car_id:
@@ -75,14 +73,11 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         if updated_rent.days_qty or new_car:
             updated_rent.total_price = ((updated_rent.days_qty or rent.days_qty) *
                                         (new_car.price_per_day if new_car else rent.car.price_per_day))
-
         if new_car:
             car_upd_dto = CarUpdate(available=True, )
             await self.car_repo.update(old_car_id, car_upd_dto)
             car_upd_dto = CarUpdate(available=False, )
             await self.car_repo.update(new_car.id, car_upd_dto)
-
-
         # Чтобы exclude_unset в репозитории их увидел как "не тронутые"
         updated_rent.__pydantic_fields_set__ = {
             name for name in updated_rent.__dict__
@@ -92,24 +87,16 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         await self.repo.get_by_id(ObjectId(rent_id))
         return await self.repo.get_by_id(ObjectId(rent_id))
 
-        # user = await self.user_repo.get_by_id(rent_req_dto.client_id)
-        # if not user or not user.active:
-        #     raise HTTPException(status_code=404, detail="User not found")
-        # car_upd_dto = CarUpdate(
-        #     available=False,
-        # )
-        # rent = RentCreate(
-        #     **rent_req_dto.model_dump(),
-        #     total_price=rent_req_dto.days_qty * car.price_per_day,
-        #     end_date=rent_req_dto.start_date + timedelta(days=rent_req_dto.days_qty)
-        # )
-        # future_rents = await self.repo.get_by_car_id(car.id)
-        # if future_rents:
-        #     self._check_is_overlapping(rent.start_date, rent.end_date, future_rents)
-        #
-        # await self.car_repo.update(rent_req_dto.car_id, car_upd_dto)
-        # rent = await rent_repo.create(rent)
-        # return rent
+    async def delete_rent(self, rent_id: str) -> Any:
+        rent = await self.repo.get_by_id(ObjectId(rent_id))
+        if not rent:
+            raise HTTPException(status_code=404, detail="Rent not found")
+        car_upd_dto = CarUpdate(available=True)
+        await self.car_repo.update(rent.car_id, car_upd_dto)
+        success = await self.repo.delete(ObjectId(rent_id))
+        if not success:
+            raise HTTPException(status_code=404, detail="Item not found")
+        return {"success": True}
 
     def _check_is_overlapping(self, required_start: datetime, required_end: datetime, bookings: list[Rent]):
         for rent in bookings:
