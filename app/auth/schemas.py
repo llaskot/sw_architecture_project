@@ -31,3 +31,7 @@ class UserPermissionsDto(BaseModel):
         populate_by_name=True,
         from_attributes=True
     )
+
+class RegisterResponse(BaseModel):
+    success: bool
+    email: EmailStr

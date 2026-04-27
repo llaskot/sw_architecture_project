@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -11,6 +12,7 @@ from app.auto_models import auto_models_router
 from app.autos import car_router
 from app.rents.router import router as rent_router
 from app.checkup import checkup_router
+from app.mailer.consumer import dispatcher, consumer
 
 
 logging.basicConfig(
@@ -26,7 +28,10 @@ logging.basicConfig(
 async def lifespan(_: FastAPI):
     await setup_db()
     print("🚀 Database is ready")
+    worker_task = asyncio.create_task(consumer())
+    print("LOG: Consumer started")
     yield
+    worker_task.cancel()
     client.close()
 
 

@@ -5,19 +5,21 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 
 # from pymongo.errors import DuplicateKeyError, PyMongoError
 #
-from app.auth.schemas import LoginResponse, ConfirmationCode, LoginDto
+from app.auth.schemas import LoginResponse, ConfirmationCode, LoginDto, RegisterResponse
 # from app.auth.service import AuthService
 # from app.users import UserCreate, User, UserPermissionsDto
 from fastapi import APIRouter
 
 from app.auth.service import AuthService
+from app.mailer.decorators import debug_request_response, debug_response
 from app.users.schemas import UserRegistrate, UserResponseAdm
 from app.users.service import UserService
 
 router = APIRouter(prefix="/auth", tags=["Authentification"])
 
 
-@router.post("/register")
+@router.post("/register", response_model=RegisterResponse)
+@debug_response
 def registrate_user(user_data: UserRegistrate, response: Response):
     auth_service = AuthService()
     try:
@@ -30,7 +32,7 @@ def registrate_user(user_data: UserRegistrate, response: Response):
             path="/auth",
             max_age=1200
         )
-        return {"success": True, "cod_for_test": code}
+        return {"success": True, "cod_for_test": code, "email": user_data.email}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 

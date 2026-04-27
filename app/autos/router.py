@@ -4,6 +4,7 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Response, Request, HTTPException, Depends, Query
 from pymongo.errors import DuplicateKeyError
 
+from app.auth.dependencies import check_admin
 from app.auto_models.auto_model_model import CarCategory
 from app.autos import CarService
 from app.autos.schemas import CarCreate, CarUpdate, SortOrder, AllCarsResponse
@@ -12,8 +13,11 @@ from app.autos.schemas import CarCreate, CarUpdate, SortOrder, AllCarsResponse
 router = APIRouter(prefix="/cars", tags=["Cars"])
 
 
-@router.post("/")
+@router.post("/", dependencies=[Depends(check_admin)])
 async def create_car(car_data: CarCreate, response: Response):
+    """
+    Admin ONLY
+    """
     service = CarService()
     try:
         return await service.create(car_data)
@@ -25,8 +29,11 @@ async def create_car(car_data: CarCreate, response: Response):
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.patch("/{car_id}")
+@router.patch("/{car_id}", dependencies=[Depends(check_admin)])
 async def update_car(car_id: str, model_data: CarUpdate, response: Response):
+    """
+    Admin ONLY
+    """
     service = CarService()
     try:
         return await service.update(car_id, model_data)
@@ -59,8 +66,11 @@ async def get_by_id(model_id: str):
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e)) from e
 
-@router.delete("/{car_id}")
+@router.delete("/{car_id}", dependencies=[Depends(check_admin)])
 async def delete(car_id: str):
+    """
+    Admin ONLY
+    """
     service = CarService()
     try:
         return await service.delete(car_id)

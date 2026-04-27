@@ -1,13 +1,17 @@
-from fastapi import APIRouter, Response, Request, HTTPException
+from fastapi import APIRouter, Response, Request, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
+from app.auth.dependencies import check_admin
 from app.brands.schemas import BrandUpdate, BrandCreate
 from app.brands.service import BrandService
 
 router = APIRouter(prefix="/brand", tags=["Brands"])
 
-@router.post("/")
+@router.post("/",  dependencies=[Depends(check_admin)])
 async def create_brand(brand_data: BrandCreate, response: Response):
+    """
+    Admin ONLY
+    """
     service = BrandService()
     try:
         return await service.create(brand_data)
@@ -20,8 +24,11 @@ async def create_brand(brand_data: BrandCreate, response: Response):
         raise HTTPException(status_code=500, detail=str(e)) from e
 #
 #
-@router.patch("/{brand_id}")
+@router.patch("/{brand_id}",  dependencies=[Depends(check_admin)])
 async def update_brand(brand_id: str, brand_data: BrandUpdate, response: Response):
+    """
+    Admin ONLY
+    """
     service = BrandService()
     try:
         return await service.update(brand_id, brand_data)
@@ -52,8 +59,11 @@ async def get_all():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-@router.delete("/{brand_id}")
+@router.delete("/{brand_id}",  dependencies=[Depends(check_admin)])
 async def delete(brand_id: str):
+    """
+    Admin ONLY
+    """
     service = BrandService()
     try:
         return await service.delete(brand_id)

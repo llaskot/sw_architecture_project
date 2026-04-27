@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "abstractservice",
+    "aiosmtplib>=5.1.0",
     "bcrypt>=5.0.0",
     "beanie>=2.0.1",
     "cryptography>=46.0.5",

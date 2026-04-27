@@ -1,8 +1,9 @@
 # from beanie import PydanticObjectId
 from bson import ObjectId
-from fastapi import APIRouter, Response, Request, HTTPException
+from fastapi import APIRouter, Response, Request, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
+from app.auth.dependencies import check_admin
 #
 from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate
 from app.auto_models.service import AutoModelService
@@ -18,8 +19,11 @@ async def get_categories():
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-@router.post("/")
+@router.post("/",  dependencies=[Depends(check_admin)])
 async def create_model(model_data: AutoModelCreate, response: Response):
+    """
+    Admin ONLY
+    """
     service = AutoModelService()
     try:
         return await service.create(model_data)
@@ -31,8 +35,11 @@ async def create_model(model_data: AutoModelCreate, response: Response):
         raise HTTPException(status_code=500, detail=str(e)) from e
 #
 #
-@router.patch("/{model_id}")
+@router.patch("/{model_id}",  dependencies=[Depends(check_admin)])
 async def update_model(model_id: str, model_data: AutoModelUpdate, response: Response):
+    """
+    Admin ONLY
+    """
     service = AutoModelService()
     try:
         return await service.update(model_id, model_data)
@@ -64,8 +71,11 @@ async def get_all():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-@router.delete("/{model_id}")
+@router.delete("/{model_id}",  dependencies=[Depends(check_admin)])
 async def delete(model_id: str):
+    """
+    Admin ONLY
+    """
     service = AutoModelService()
     try:
         return await service.delete(model_id)
