@@ -60,7 +60,7 @@ def debug_request_response(func):
     return wrapper
 
 
-def debug_response(func):
+def confirm_mail(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
 
@@ -69,9 +69,6 @@ def debug_response(func):
         else:
             response = func(*args, **kwargs)
 
-        # 3. Печатаем респонс
-        # print(f"RESPONSE DATA: {response}")
-        # print("=" * 50 + "\n")
         dispatcher.put_nowait(response)
 
         return response

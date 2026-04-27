@@ -12,7 +12,7 @@ from bson import ObjectId
 from cryptography.fernet import Fernet
 from fastapi import HTTPException, Response
 
-from .schemas import ConfirmationCode, LoginDto, UserPermissionsDto
+from .schemas import ConfirmationCode, LoginDto, UserPermissionsDto, PassRestore, ChangePassword
 from app.users.repository import user_repo
 from app.users.schemas import UserRegistrate, UserCreate
 from app.users.user_model import User
@@ -35,9 +35,12 @@ class AuthService:
             self._generated_key = Fernet(fernet_key)
         return self._generated_key
 
-    def _encrypt_registration_data(self, user_data: UserRegistrate, code: str) -> str:
+    def _encrypt_registration_data(self, user_data: UserRegistrate | dict, code: str) -> str:
+        if isinstance(user_data, UserRegistrate):
         # Конвертируем DTO в обычный словарь
-        user_dict = user_data.model_dump()
+            user_dict = user_data.model_dump()
+        else:
+            user_dict = user_data
         payload = {
             "user": user_dict,
             "code": code
@@ -46,16 +49,23 @@ class AuthService:
         return code_key.encrypt(json.dumps(payload).encode()).decode()
 
     def _decrypt_registration_data(self, encrypted_data: str) -> tuple[UserCreate, str]:
-        code_key = self._get_generated_key()
-        decrypted_bytes = code_key.decrypt(encrypted_data.encode())
-        decrypted_json = decrypted_bytes.decode()
-        payload = json.loads(decrypted_json)
-
+        # code_key = self._get_generated_key()
+        # decrypted_bytes = code_key.decrypt(encrypted_data.encode())
+        # decrypted_json = decrypted_bytes.decode()
+        payload = self._decrypt(encrypted_data)
+        print(payload)
         # 4. Восстанавливаем DTO и код
         # Pydantic сам разложит словарь обратно в модель
         user_data = UserCreate(**payload["user"])
         code = payload["code"]
         return user_data, code
+
+
+    def _decrypt(self, encrypted_data: str) -> dict:
+        code_key = self._get_generated_key()
+        decrypted_bytes = code_key.decrypt(encrypted_data.encode())
+        decrypted_json = decrypted_bytes.decode()
+        return json.loads(decrypted_json)
 
     #
     def _generate_verification_code(self) -> str:
@@ -148,4 +158,25 @@ class AuthService:
         )
         return tokens["access_token"]
 
-#
+    async def get_restore_code(self, restore_dto: PassRestore):
+        res_success = await user_repo.find_for_logining(restore_dto)
+
+        if not res_success:
+            raise HTTPException(
+                status_code=401,
+                detail="Incorrect credentials"
+            )
+        id = str(res_success.get("_id"))
+        code = self._generate_verification_code()
+        encoded_user = self._encrypt_registration_data({"id": id}, code)
+        return res_success.get("email"), code, encoded_user
+
+    async def change_password(self, body: ChangePassword, encoded_user: str):
+        decrypted = self._decrypt(encoded_user)
+        if decrypted['code'] != body.conf_code:
+            raise HTTPException(
+                status_code=400,
+                detail=f"incorrect confirmation code"
+            )
+        await user_repo.change_password(decrypted["user"]["id"], self.get_password_hash(body.new_password))
+        return {"success": True, "message": "Password changed successfully"}
