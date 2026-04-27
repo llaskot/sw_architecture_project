@@ -19,7 +19,8 @@ class User(BaseModel):
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
-        populate_by_name=True
+        populate_by_name=True,
+        from_attributes=True
     )
 
     # @field_serializer("id")

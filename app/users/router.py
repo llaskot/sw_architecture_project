@@ -1,14 +1,19 @@
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
-from app.users.schemas import UserCreate, UserResponseAdm, UserUpdate
-from app.users.service import UserService
+from .schemas import UserCreate, UserResponseAdm, UserUpdate, UserUpdateShort
+from .service import UserService
+from ..auth.dependencies import check_admin, check_manager, check_token
+from ..auth.schemas import UserPermissionsDto
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-@router.post("/", response_model=UserResponseAdm)
+@router.post("/", response_model=UserResponseAdm, dependencies=[Depends(check_admin)])
 async def create_user(user_data: UserCreate):
+    """
+    Admin only
+    """
     service = UserService()
     try:
         return await service.create(user_data)
@@ -17,12 +22,15 @@ async def create_user(user_data: UserCreate):
     except DuplicateKeyError as e:
         raise HTTPException(status_code=409, detail=f"Duplicate value for field: {e.details['keyPattern']}") from e
     except Exception as e:
-        print(e)
+        # print(e)
         raise HTTPException(status_code=500, detail=str(e)) from e
 #
 #
-@router.get("/", response_model=list[UserResponseAdm])
+@router.get("/", response_model=list[UserResponseAdm], dependencies=[Depends(check_admin)])
 async def get_all():
+    """
+    Admin only
+    """
     service = UserService()
     try:
         return await service.get_all()
@@ -31,20 +39,42 @@ async def get_all():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-# @router.get("/profile", response_model=UserResponse)
-# async def get_profile(user: UserPermissionsDto = Depends(check_token)):
-#     try:
-#         return await UserService.get_user_by_id(PydanticObjectId(user.id))
-#     except HTTPException as e:
-#         raise e from e
-#     except Exception as e:
-#         if isinstance(e, PyMongoError):
-#             raise HTTPException(status_code=500, detail=f"Database error:\n {str(e)}") from e
-#         raise HTTPException(status_code=500, detail=f"Server error: \n{str(e)}") from e
-#
-#
-@router.get("/{user_id}", response_model=UserResponseAdm)
+@router.get("/profile", response_model=UserResponseAdm)
+async def get_profile(user: UserPermissionsDto = Depends(check_token)):
+    """
+    Owner only
+    """
+    service = UserService()
+    try:
+        return await service.get_by_id(user.id)
+    except HTTPException as e:
+        raise e from e
+    except Exception as e:
+        if isinstance(e, PyMongoError):
+            raise HTTPException(status_code=500, detail=f"Database error:\n {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Server error: \n{str(e)}") from e
+
+@router.patch("/profile", response_model=UserResponseAdm)
+async def update_profile(user_data: UserUpdateShort, user: UserPermissionsDto = Depends(check_token)):
+    """
+    Owner only
+    """
+    service = UserService()
+    try:
+        return await service.update(user.id,UserUpdate(**user_data.model_dump(exclude_unset=True)))
+    except HTTPException as http_ex:
+        raise http_ex
+    except DuplicateKeyError as e:
+        raise HTTPException(status_code=409, detail=f"Duplicate value for field: {e.details['keyPattern']}") from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/{user_id}", response_model=UserResponseAdm, dependencies=[Depends(check_manager)])
 async def get_user(user_id: str):
+    """
+    Manager or Admin only
+    """
     service = UserService()
     try:
         return await service.get_by_id(user_id)
@@ -56,8 +86,11 @@ async def get_user(user_id: str):
         raise HTTPException(status_code=500, detail=f"Server error: \n{str(e)}") from e
 
 
-@router.patch("/{user_id}", response_model=UserResponseAdm)
+@router.patch("/{user_id}", response_model=UserResponseAdm, dependencies=[Depends(check_manager)])
 async def update_user(user_id: str, user_data: UserUpdate):
+    """
+    Admin only
+    """
     service = UserService()
     try:
         return await service.update(user_id, user_data)
@@ -69,8 +102,11 @@ async def update_user(user_id: str, user_data: UserUpdate):
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}",  dependencies=[Depends(check_admin)])
 async def delete(user_id: str):
+    """
+    Admin only
+    """
     service = UserService()
     try:
         return await service.delete(user_id)

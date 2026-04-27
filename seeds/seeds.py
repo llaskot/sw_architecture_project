@@ -45,7 +45,7 @@ async def seed(iterations: int = 5):
         user_dto = UserCreate(
             email=fake.unique.email(),
             login=fake.unique.user_name()+'_usr',
-            password="$2b$12$GxiGn5xuZgymuIQxTzqEZOkl8kdBn99lcGH2PAFTU8bzNxHwpn4fu",
+            password="string",
             first_name=fake.first_name(),
             last_name=fake.last_name(),
         )

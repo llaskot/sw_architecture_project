@@ -1,7 +1,6 @@
-# from typing import Final
-#
-# from fastapi import HTTPException
+
 from fastapi import APIRouter, Response, Request, HTTPException
+from pydantic import ValidationError
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
 # from pymongo.errors import DuplicateKeyError, PyMongoError

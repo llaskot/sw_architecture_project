@@ -2,6 +2,7 @@ from typing import Annotated, Optional
 
 from bson import ObjectId
 from pydantic import EmailStr, Field, BaseModel, field_validator, ConfigDict, BeforeValidator
+from pydantic_mongo import ObjectIdField
 
 
 class UserCreate(BaseModel):
@@ -25,22 +26,26 @@ class UserRegistrate(BaseModel):
 
 
 
-class UserUpdate(BaseModel):
-    """Updating by admin scheme"""
+
+
+class UserUpdateShort(BaseModel):
+    """Updating by owner scheme"""
     email: EmailStr  # Авто-валидация формата почты
     login: Optional[str] = Field(None, min_length=6, max_length=20)
     first_name: Optional[str] = Field(None, min_length=1)
     last_name: Optional[str] = Field(None, min_length=1)
+
+
+class UserUpdate(UserUpdateShort):
+    """Updating by admin scheme"""
+
     active: Optional[bool] = Field(None)
     is_admin: Optional[bool] = Field(None)
     is_manager: Optional[bool] = Field(None)
 
-
-PyObjectId = Annotated[str, BeforeValidator(str)]
-
 class UserResponseAdm(BaseModel):
     """Admin Response schema"""
-    id: PyObjectId = Field(alias="_id")
+    id: ObjectIdField = Field(alias="_id")
     email: str
     login: str
     first_name: str
@@ -60,19 +65,4 @@ class UserResponseAdm(BaseModel):
 #     email: EmailStr
 #     login: str
 #
-class UserPermissionsDto(BaseModel):
-    id: str
-    active: bool
-    is_admin: bool
-    is_manager: bool
 
-    @field_validator("id", mode="before")
-    @classmethod
-    def serialize_id(cls, v):
-        # Если пришел ObjectId, превращаем в строку, иначе оставляем как есть
-        return str(v) if v else v
-
-    model_config = {
-        "from_attributes": True,
-        "populate_by_name": True
-    }

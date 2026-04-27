@@ -12,9 +12,9 @@ from bson import ObjectId
 from cryptography.fernet import Fernet
 from fastapi import HTTPException, Response
 
-from app.auth.schemas import ConfirmationCode, LoginDto
+from .schemas import ConfirmationCode, LoginDto, UserPermissionsDto
 from app.users.repository import user_repo
-from app.users.schemas import UserRegistrate, UserCreate, UserPermissionsDto
+from app.users.schemas import UserRegistrate, UserCreate
 from app.users.user_model import User
 
 class AuthService:
@@ -89,7 +89,8 @@ class AuthService:
         refresh = jwt.encode(payload, key, algorithm="HS256")
         return {"access_token": access, "refresh_token": refresh}
 
-    def decode_token(self, token: str) -> UserPermissionsDto | None:
+    @staticmethod
+    def decode_token(token: str) -> UserPermissionsDto | None:
         key = os.getenv("JWT_SOLT")
         try:
             payload = jwt.decode(token, key, algorithms=["HS256"])
@@ -119,17 +120,23 @@ class AuthService:
 
 
     async def login_user(self, data: LoginDto) -> User:
-        user = User.model_validate(await user_repo.find_for_logining(data))
+        res_success = await user_repo.find_for_logining(data)
+        if not res_success:
+            raise HTTPException(
+                status_code=401,
+                detail="Incorrect username or password"
+            )
+        user = User.model_validate(res_success)
         if not user or not self.verify_password(data.password, user.password):
             raise HTTPException(
-                status_code=403,
+                status_code=401,
                 detail="Incorrect username or password"
             )
         return user
 
     def prepare_tokens(self, user: User, response: Response):
         permissions = UserPermissionsDto.model_validate(user)
-        user_payload = permissions.model_dump()
+        user_payload = permissions.model_dump(mode="json")
         tokens = self.create_token(user_payload)
         response.set_cookie(
             key="refresh_token",
@@ -140,4 +147,5 @@ class AuthService:
             max_age=self.REFRESH_AGE
         )
         return tokens["access_token"]
+
 #
