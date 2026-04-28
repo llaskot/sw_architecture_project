@@ -1,19 +1,25 @@
-from fastapi import APIRouter, Response, Request, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Response, Request, HTTPException, Depends, Query, Path
 from pymongo.errors import DuplicateKeyError
 
+from app.auth.dependencies import check_admin, check_token, check_manager
+from app.auth.schemas import UserPermissionsDto
 from app.brands.schemas import BrandUpdate, BrandCreate
 from app.brands.service import BrandService
-from app.rents.schemas import RentCreate, RentRead, RentRequest, RentUpdateRequest
+from app.rents.rent_model import RentStage
+from app.rents.schemas import RentCreate, RentRead, RentRequest, RentUpdateRequest, ChangeStage
 from app.rents.service import RentService
 
 router = APIRouter(prefix="/rent", tags=["Rents"])
 
+
 @router.post("/",
              )
-async def create_rent(rent_data: RentRequest, response: Response):
+async def create_rent(rent_data: RentRequest, user: UserPermissionsDto = Depends(check_token)):
     service = RentService()
     try:
-        return await service.create(rent_data)
+        return await service.create_rent(rent_data, user)
     except HTTPException as http_ex:
         raise http_ex
     except DuplicateKeyError as e:
@@ -24,10 +30,10 @@ async def create_rent(rent_data: RentRequest, response: Response):
 
 
 @router.patch("/{rent_id}")
-async def update_rent(rent_id: str, rent_data: RentUpdateRequest, response: Response):
+async def update_rent(rent_id: str, rent_data: RentUpdateRequest, user: UserPermissionsDto = Depends(check_token)):
     service = RentService()
     try:
-        return await service.update(rent_id, rent_data)
+        return await service.update_rent(rent_id, rent_data, user)
     except HTTPException as http_ex:
         raise http_ex
     except DuplicateKeyError as e:
@@ -35,30 +41,39 @@ async def update_rent(rent_id: str, rent_data: RentUpdateRequest, response: Resp
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
+
 @router.get("/{rent_id}",
-            response_model=RentRead
+            response_model=RentRead,
             )
-async def get_by_id(rent_id: str):
+async def get_by_id(rent_id: str, user: UserPermissionsDto = Depends(check_token)):
     service = RentService()
     try:
-        return await service.get_by_id(rent_id)
-    except HTTPException as http_ex:
-        raise http_ex
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-#
-@router.get("/")
-async def get_all():
-    service = RentService()
-    try:
-        return await service.get_all()
+        return await service.get_rent(rent_id, user)
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-@router.delete("/{rent_id}")
+
+@router.get("/")
+async def get_all_rents(
+        hide_inactive: Annotated[bool, Query(
+            description="For Admins only")] = True,
+        user: UserPermissionsDto = Depends(check_token)):
+    service = RentService()
+    try:
+        return await service.get_all_rents(user, hide_inactive)
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.delete("/{rent_id}", dependencies=[Depends(check_admin)])
 async def delete(rent_id: str):
+    """
+    Admin ONLY
+    """
     service = RentService()
     try:
         return await service.delete_rent(rent_id)
@@ -68,3 +83,18 @@ async def delete(rent_id: str):
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
+@router.put("/{rent_id}/{stage}")
+async def change_stage(rent_id: str,
+                       stage: Annotated[RentStage, Path(description="Select stage")],
+                       body: ChangeStage ,
+                       user: UserPermissionsDto = Depends(check_manager)):
+    """
+    Admin or manager ONLY
+    """
+    service = RentService()
+    try:
+        return await service.change_stage(rent_id, stage, body, user)
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e

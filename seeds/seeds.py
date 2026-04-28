@@ -17,12 +17,12 @@ from app.auto_models.schemas import AutoModelCreate, CarCategory
 from app.autos import CarService
 from app.brands.schemas import BrandCreate
 from app.brands.service import BrandService
+from app.rents.schemas import RentRequest
+from app.rents.service import RentService
 from app.users.schemas import UserCreate
 from app.users.service import UserService
 
 fake = Faker()
-
-
 
 
 async def seed(iterations: int = 5):
@@ -36,22 +36,18 @@ async def seed(iterations: int = 5):
     model_serv = AutoModelService()
     car_serv = CarService()
     user_serv = UserService()
-
-
-
-
+    remt_serv = RentService()
 
     for _ in range(iterations):
         user_dto = UserCreate(
             email=fake.unique.email(),
-            login=fake.unique.user_name()+'_usr',
+            login=fake.unique.user_name() + '_usr',
             password="string",
             first_name=fake.first_name(),
             last_name=fake.last_name(),
         )
         new_user = await user_serv.create(user_dto)
         print(new_user)
-
 
         brand_dto = BrandCreate(
             name=fake.unique.company(),
@@ -61,7 +57,6 @@ async def seed(iterations: int = 5):
 
         new_brand = await brand_serv.create(brand_dto)
         print(new_brand)
-
 
         dto = AutoModelCreate(
             brand_id=new_brand.id,
@@ -85,18 +80,27 @@ async def seed(iterations: int = 5):
 
         car = await car_serv.create(car_dto)
         print(car)
-        #
+
         # rent_dto = RentCreate(
-        #     client = new_user.id,
-        #     car = car.id,
-        #     user_dock = "".join(random.choices(string.ascii_uppercase + string.digits, k=8)),
-        #     days_qty = random.randint(2, 60),
+        #     client=new_user.id,
+        #     car=car.id,
+        #     user_dock="".join(random.choices(string.ascii_uppercase + string.digits, k=8)),
+        #     days_qty=random.randint(2, 60),
         # )
         # new_rent = await rent_rep.save_rent(rent_dto)
         # print(new_rent)
 
+        rent_dto = RentRequest(
+            car_id = car.id,
+            client_id=new_user.id,
+            driver=False,
+            user_dock="".join(random.choices(string.ascii_uppercase + string.digits, k=8)),
+            days_qty=random.randint(2, 60),
+            start_date= fake.date_time_between(start_date='+1d', end_date='+1m')
+        )
+        new_rent = await remt_serv.create(rent_dto)
+        print(new_rent)
 
-
-# Запуск
+    # Запуск
 if __name__ == "__main__":
     asyncio.run(seed())

@@ -6,7 +6,7 @@ from bson import ObjectId
 from app.abstracts import AbstractRepository
 from app.database import db
 from app.rents.rent_model import Rent
-from app.rents.schemas import RentCreate, RentUpdate, RentRead
+from app.rents.schemas import RentCreate, RentUpdate, RentRead, ChangeStage
 
 
 class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
@@ -110,6 +110,18 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
         documents = await cursor.to_list(length=None)
         if not documents or len(documents) == 0: return None
         return [self.model.model_validate(doc) for doc in documents]
+
+    async def get_all_own(self, user_id: ObjectId) -> list[Any]:
+        match_stage = {"$match": {}}
+        match_stage["$match"]["active"] = True
+        match_stage["$match"]["client_id"] = user_id
+        full_pipeline = [match_stage] + self.read_pipeline
+        cursor = self.collection.aggregate(full_pipeline)
+        documents = await cursor.to_list(length=None)
+        return [self.response_model.model_validate(doc) for doc in documents]
+
+    # async def update_stage(self, rent_id: ObjectId, changes: ChangeStage) -> Any:
+    #     return await self.update(rent_id, changes)
 
 
 rent_repo = RentRepository(db)

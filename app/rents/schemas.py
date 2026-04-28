@@ -16,7 +16,6 @@ from app.users.user_model import User
 class RentRequest(BaseModel):
     """Request rent schema"""
     car_id: ObjectIdField = Field(..., description="Exists car id")
-    client_id: ObjectIdField = Field(..., description="exists user id")
     driver: Optional[bool] = Field(False, description="driver required")
     user_dock: str
     start_date: datetime
@@ -30,6 +29,7 @@ class RentRequest(BaseModel):
 
 class RentCreate(RentRequest):
     """Create rent schema"""
+    client_id: ObjectIdField = Field(..., description="exists user id")
     end_date: datetime = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -62,6 +62,19 @@ class RentUpdate(RentUpdateRequest):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_by: Optional[ObjectIdField] = Field(None, description="Reference to user collection")
     total_price: Optional[float] = Field(None, description="Total price")
+
+class ChangeStage(BaseModel):
+    """Change stage schema"""
+    comment: Optional[str] = Field(None, description="Manager Comment")
+
+class UpdateStage(ChangeStage):
+    """Update stage in DB"""
+    stage: RentStage
+    updated_by: ObjectIdField = Field(..., description="Reference to user collection")
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+
 
 
 
