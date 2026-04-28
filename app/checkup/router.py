@@ -1,8 +1,9 @@
 # from beanie import PydanticObjectId
 from bson import ObjectId
-from fastapi import APIRouter, Response, Request, HTTPException
+from fastapi import APIRouter, Response, Request, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
+from app.auth.dependencies import check_manager, check_admin
 #
 from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate, AutoModelRead
 from app.auto_models.service import AutoModelService
@@ -15,18 +16,10 @@ from app.checkup.service import CheckupService
 router = APIRouter(prefix="/checkup", tags=["Checkup when returned"])
 
 
-# @router.get("/categories")
-# async def get_categories():
-#     service = AutoModelService()
-#     try:
-#         return await service.get_categories()
-#     except HTTPException as http_ex:
-#         raise http_ex
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e)) from e
-#
-@router.post("/")
-async def create_checkup(checkup_data: CheckupCreate, response: Response)  -> CheckupModel:
+
+
+@router.post("/",  dependencies=[Depends(check_manager)])
+async def create_checkup(checkup_data: CheckupCreate)  -> CheckupModel:
     service = CheckupService()
     try:
         return await service.create(checkup_data)
@@ -38,7 +31,7 @@ async def create_checkup(checkup_data: CheckupCreate, response: Response)  -> Ch
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.patch("/{checkup_id}")
+@router.patch("/{checkup_id}", dependencies=[Depends(check_manager)])
 async def checkup_model(checkup_id: str, checkup_data: CheckupUpdate) -> CheckupModel:
     service = CheckupService()
     try:
@@ -71,7 +64,7 @@ async def get_all() -> list[CheckupRead]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 #
-@router.delete("/{checkup_id}")
+@router.delete("/{checkup_id}",  dependencies=[Depends(check_admin)])
 async def delete(checkup_id: str):
     service = CheckupService()
     try:
