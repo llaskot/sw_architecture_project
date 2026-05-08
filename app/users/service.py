@@ -6,8 +6,8 @@ from app.users.schemas import UserCreate, UserUpdate
 
 
 class UserService(AbstractService[UserCreate, UserUpdate]):
-    def __init__(self):
-        super().__init__(user_repo)
+    def __init__(self, repo=user_repo):
+        super().__init__(repo)
 
     async def create(self, data: UserCreate):
         password = self.get_password_hash(data.password)

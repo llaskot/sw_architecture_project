@@ -41,9 +41,9 @@ class RentCreate(RentRequest):
 
 
 class RentUpdateRequest(BaseModel):
-    """Request rent schema"""
+    """Request rent update schema"""
     car_id: Optional[ObjectIdField] = Field(None, description="Exists car id")
-    client_id: Optional[ObjectIdField] = Field(None, description="exists user id")
+    # client_id: Optional[ObjectIdField] = Field(None, description="exists user id")
     driver: Optional[bool] = Field(None, description="driver required")
     user_dock: Optional[str] = Field(None, description="user dock")
     start_date: Optional[datetime] = Field(None, description="start rent date")

@@ -7,16 +7,17 @@ from watchfiles import awatch
 
 from app.abstracts import AbstractService
 from app.auth.schemas import UserPermissionsDto
-from app.autos import car_repo
+from app.autos import car_repo as cr
+from app.autos.repository import CarRepository
 from app.autos.schemas import CarUpdate
 from app.rents.rent_model import Rent, RentStage
-from app.rents.repository import rent_repo
+from app.rents.repository import rent_repo as rr, RentRepository
 from app.rents.schemas import RentCreate, RentUpdate, RentRead, RentRequest, RentUpdateRequest, ChangeStage, UpdateStage
-from app.users.repository import user_repo
+from app.users.repository import user_repo as ur, UserRepository
 
 
 class RentService(AbstractService[RentCreate, RentUpdate]):
-    def __init__(self):
+    def __init__(self, rent_repo: RentRepository = rr, user_repo: UserRepository = ur, car_repo: CarRepository = cr):
         super().__init__(rent_repo)
         self.car_repo = car_repo  # Подключаем репо машин
         self.user_repo = user_repo  # Подключаем репо юзеров
@@ -29,9 +30,9 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         user = await self.user_repo.get_by_id(client_id)
         if not user or not user.active:
             raise HTTPException(status_code=404, detail="User not found")
-        car_upd_dto = CarUpdate(
-            available=False
-        )
+        # car_upd_dto = CarUpdate(
+        #     available=False
+        # )
         rent = RentCreate(
             **rent_req_dto.model_dump(),
             client_id=client_id,
@@ -42,12 +43,11 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         if future_rents:
             self._check_is_overlapping(rent.start_date, rent.end_date, future_rents)
 
-        await self.car_repo.update(rent_req_dto.car_id, car_upd_dto)
-        rent = await rent_repo.create(rent)
+        # await self.car_repo.update(rent_req_dto.car_id, car_upd_dto)
+        rent = await self.repo.create(rent)
         return rent
 
-    async def update_rent(self, rent_id: str, rent_req_dto: RentUpdateRequest, user_payload: UserPermissionsDto,
-                          hide_inactive: bool = None) -> Any:
+    async def update_rent(self, rent_id: str, rent_req_dto: RentUpdateRequest, user_payload: UserPermissionsDto) -> Any:
         rent = await self.repo.get_by_id(ObjectId(rent_id))
         if not rent or not rent.active:
             raise HTTPException(status_code=404, detail="Rent not found")
@@ -64,43 +64,23 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         updated_rent = RentUpdate(
             **rent_req_dto.model_dump(),
         )
-        if updated_rent.start_date or updated_rent.days_qty:
-            updated_rent.end_date = ((rent_req_dto.start_date or rent.start_date) +
-                                     timedelta(days=(rent_req_dto.days_qty or rent.days_qty)))
-        new_car = None
-        old_car_id = rent.car_id
-        if rent_req_dto.car_id and rent.car_id != rent_req_dto.car_id:
-            new_car = await self.car_repo.get_by_id(rent_req_dto.car_id)
-            if not new_car:
-                raise HTTPException(status_code=404, detail="Car not found")
-
-            future_rents = await self.repo.get_by_car_id(new_car.id)
-            if future_rents:
-                self._check_is_overlapping(
-                    updated_rent.start_date or rent.start_date,
-                    updated_rent.end_date or rent.end_date,
-                    future_rents)
-
-            updated_rent.car_id = new_car.id
-        if new_car and (not new_car.active or not new_car.available or new_car.in_use):
-            raise HTTPException(status_code=404, detail="Car not available")
-
-        if updated_rent.days_qty or new_car:
-            updated_rent.total_price = ((updated_rent.days_qty or rent.days_qty) *
-                                        (new_car.price_per_day if new_car else rent.car.price_per_day))
-        if new_car:
-            car_upd_dto = CarUpdate(available=True, )
-            await self.car_repo.update(old_car_id, car_upd_dto)
-            car_upd_dto = CarUpdate(available=False, )
-            await self.car_repo.update(new_car.id, car_upd_dto)
-        # Чтобы exclude_unset в репозитории их увидел как "не тронутые"
-        updated_rent.__pydantic_fields_set__ = {
-            name for name in updated_rent.__dict__
-            if updated_rent.__dict__[name] is not None
-        }
+        if not (updated_rent.start_date or updated_rent.end_date or updated_rent.car_id):
+            await self.repo.update(ObjectId(rent_id), updated_rent)
+            return await self.repo.get_by_id(ObjectId(rent_id))
+        car_id = updated_rent.car_id or rent.car_id
+        new_car = await self.car_repo.get_by_id(car_id)
+        future_rents = await self.repo.get_by_car_id(car_id)
+        future_rents = [r for r in future_rents if r.id != rent.id]
+        updated_rent.total_price = (updated_rent.days_qty or rent.days_qty) * new_car.price_per_day
+        updated_rent.start_date = (updated_rent.start_date or rent.start_date)
+        updated_rent.end_date = ((updated_rent.start_date or rent.start_date)
+                                 + timedelta(days=(updated_rent.days_qty or rent.days_qty)))
+        if future_rents:
+            self._check_is_overlapping(updated_rent.start_date, updated_rent.end_date, future_rents)
         await self.repo.update(ObjectId(rent_id), updated_rent)
-        await self.repo.get_by_id(ObjectId(rent_id))
         return await self.repo.get_by_id(ObjectId(rent_id))
+
+
 
     async def delete_rent(self, rent_id: str) -> Any:
         rent = await self.repo.get_by_id(ObjectId(rent_id))
@@ -166,4 +146,3 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
             )
             await self.car_repo.update(ObjectId(rent.car_id), car_changes)
         return res
-

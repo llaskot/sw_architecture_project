@@ -1,15 +1,17 @@
-from dotenv import load_dotenv
-
-# 1. Загружаем переменные из файла .env в окружение (os.environ)
-load_dotenv()
+# from dotenv import load_dotenv
+#
+# # 1. Загружаем переменные из файла .env в окружение (os.environ)
+# load_dotenv()
 
 
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
+from app.core.config import settings
 
-_url = f"mongodb://{os.getenv('MONGO_USER')}:{os.getenv('MONGO_PASSWORD')}@localhost:27017"
-client = AsyncIOMotorClient(_url)
-db = client.rents_db
+
+# print(f"DEBUG: App is connecting to --> {settings.database_url}")
+client = AsyncIOMotorClient(settings.database_url)
+db = client[settings.mongo_db]
 
 # Вся "грязная" работа с индексами здесь
 async def setup_db():

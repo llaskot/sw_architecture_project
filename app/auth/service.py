@@ -13,12 +13,13 @@ from cryptography.fernet import Fernet
 from fastapi import HTTPException, Response
 
 from .schemas import ConfirmationCode, LoginDto, UserPermissionsDto, PassRestore, ChangePassword
-from app.users.repository import user_repo
+from app.users.repository import user_repo as us_repo
 from app.users.schemas import UserRegistrate, UserCreate
 from app.users.user_model import User
 
 class AuthService:
-    def __init__(self):
+    def __init__(self, user_repo = us_repo):
+        self._user_repo = user_repo
         self._generated_key = None
 
     ENV_PASSPHRASE: Final = os.getenv("SECRET_KEY")
@@ -49,13 +50,7 @@ class AuthService:
         return code_key.encrypt(json.dumps(payload).encode()).decode()
 
     def _decrypt_registration_data(self, encrypted_data: str) -> tuple[UserCreate, str]:
-        # code_key = self._get_generated_key()
-        # decrypted_bytes = code_key.decrypt(encrypted_data.encode())
-        # decrypted_json = decrypted_bytes.decode()
         payload = self._decrypt(encrypted_data)
-        print(payload)
-        # 4. Восстанавливаем DTO и код
-        # Pydantic сам разложит словарь обратно в модель
         user_data = UserCreate(**payload["user"])
         code = payload["code"]
         return user_data, code
@@ -76,20 +71,17 @@ class AuthService:
     def register_new_user(self, user_data: UserRegistrate):
         confirm_code = self._generate_verification_code()
         encoded_user = self._encrypt_registration_data(user_data, confirm_code)
-
-        # HERE WILL BEE MAILER
-
         return confirm_code, encoded_user
 
     async def create_user(self, conf_code: ConfirmationCode, encoded_user: str):
         user_dto, code = self._decrypt_registration_data(encoded_user)
         if conf_code.conf_code != code:
             raise HTTPException(
-                status_code=400,
+                status_code=401,
                 detail=f"incorrect confirmation code"
             )
         user_dto.password = self.get_password_hash(user_dto.password)
-        return await user_repo.create(user_dto)
+        return await self._user_repo.create(user_dto)
 
     def create_token(self, payload: dict):
         key = os.getenv("JWT_SOLT")
@@ -111,10 +103,10 @@ class AuthService:
             return None
 
     async def refresh(self, refresh_token: str):
-        payload = self.decode_token(refresh_token)
+        payload: UserPermissionsDto = self.decode_token(refresh_token)
         if payload is None:
-            raise HTTPException(status_code=400, detail="Invalid refresh token")
-        return await user_repo.get_by_id(ObjectId(payload.id))
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        return await self._user_repo.get_by_id(ObjectId(payload.id))
 
     def get_password_hash(self, password: str) -> str:
         pwd_bytes = password.encode('utf-8')
@@ -130,7 +122,7 @@ class AuthService:
 
 
     async def login_user(self, data: LoginDto) -> User:
-        res_success = await user_repo.find_for_logining(data)
+        res_success = await self._user_repo.find_for_logining(data)
         if not res_success:
             raise HTTPException(
                 status_code=401,
@@ -159,7 +151,7 @@ class AuthService:
         return tokens["access_token"]
 
     async def get_restore_code(self, restore_dto: PassRestore):
-        res_success = await user_repo.find_for_logining(restore_dto)
+        res_success = await self._user_repo.find_for_logining(restore_dto)
 
         if not res_success:
             raise HTTPException(
@@ -178,5 +170,5 @@ class AuthService:
                 status_code=400,
                 detail=f"incorrect confirmation code"
             )
-        await user_repo.change_password(decrypted["user"]["id"], self.get_password_hash(body.new_password))
+        await self._user_repo.change_password(decrypted["user"]["id"], self.get_password_hash(body.new_password))
         return {"success": True, "message": "Password changed successfully"}

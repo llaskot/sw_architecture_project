@@ -5,14 +5,14 @@ import string
 from faker import Faker
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from app.auto_models import auto_model_repo
+from app.auth.schemas import UserPermissionsDto
 from app.auto_models.service import AutoModelService
-from app.autos.repository import car_repo
+# from app.autos.repository import car_repo
 from app.autos.schemas import CarCreate
-from app.brands import brand_repo
-from app.autos import Car, CarService
-from app.brands import Brand
-from app.auto_models.auto_model_model import AutoModel
+# from app.brands import brand_repo
+# from app.autos import Car, CarService
+# from app.brands import Brand
+# from app.auto_models.auto_model_model import AutoModel
 from app.auto_models.schemas import AutoModelCreate, CarCategory
 from app.autos import CarService
 from app.brands.schemas import BrandCreate
@@ -81,26 +81,26 @@ async def seed(iterations: int = 5):
         car = await car_serv.create(car_dto)
         print(car)
 
-        # rent_dto = RentCreate(
-        #     client=new_user.id,
-        #     car=car.id,
-        #     user_dock="".join(random.choices(string.ascii_uppercase + string.digits, k=8)),
-        #     days_qty=random.randint(2, 60),
-        # )
-        # new_rent = await rent_rep.save_rent(rent_dto)
-        # print(new_rent)
 
         rent_dto = RentRequest(
-            car_id = car.id,
-            client_id=new_user.id,
+            car_id=car.id,
             driver=False,
             user_dock="".join(random.choices(string.ascii_uppercase + string.digits, k=8)),
             days_qty=random.randint(2, 60),
-            start_date= fake.date_time_between(start_date='+1d', end_date='+1m')
+            start_date=fake.date_time_between(start_date='+1d', end_date='+1m')
         )
-        new_rent = await remt_serv.create(rent_dto)
+
+        user_payload = UserPermissionsDto(
+            id=new_user.id,
+            active=True,
+            is_admin=False,
+            is_manager=False,
+        )
+        new_rent = await remt_serv.create_rent(rent_dto, user_payload)
         print(new_rent)
 
     # Запуск
+
+
 if __name__ == "__main__":
     asyncio.run(seed())
