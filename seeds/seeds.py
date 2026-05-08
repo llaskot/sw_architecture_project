@@ -1,35 +1,40 @@
-import asyncio
-import random
-import string
-
-from faker import Faker
-from motor.motor_asyncio import AsyncIOMotorClient
-
-from app.auth.schemas import UserPermissionsDto
-from app.auto_models.service import AutoModelService
-# from app.autos.repository import car_repo
-from app.autos.schemas import CarCreate
-# from app.brands import brand_repo
-# from app.autos import Car, CarService
-# from app.brands import Brand
-# from app.auto_models.auto_model_model import AutoModel
-from app.auto_models.schemas import AutoModelCreate, CarCategory
-from app.autos import CarService
-from app.brands.schemas import BrandCreate
-from app.brands.service import BrandService
-from app.rents.schemas import RentRequest
-from app.rents.service import RentService
-from app.users.schemas import UserCreate
-from app.users.service import UserService
-
-fake = Faker()
+# import os
+# from dotenv import load_dotenv
+#
+# # 1. Загружаем окружение СТРОГО до импортов из app
+# load_dotenv("../staged/.env")
+#
+# from app.core.config import settings
+# import asyncio
+# import random
+# import string
+#
+# from faker import Faker
+# from motor.motor_asyncio import AsyncIOMotorClient
+# from app.auth.schemas import UserPermissionsDto
+# from app.auto_models.service import AutoModelService
+# from app.autos.schemas import CarCreate
+# from app.auto_models.schemas import AutoModelCreate, CarCategory
+# from app.autos import CarService
+# from app.brands.schemas import BrandCreate
+# from app.brands.service import BrandService
+# from app.rents.schemas import RentRequest
+# from app.rents.service import RentService
+# from app.users.schemas import UserCreate
+# from app.users.service import UserService
+#
+# fake = Faker()
 
 
 async def seed(iterations: int = 5):
     # 1. Подключаемся к локальной Монге
-    client = AsyncIOMotorClient("mongodb://root:supersecretpassword@localhost:27017/?authSource=admin")
+    # client = AsyncIOMotorClient("mongodb://root:supersecretpassword@localhost:27017/?authSource=admin")
 
-    await client.drop_database("rents_db")
+    # await client.drop_database("rents_db")
+
+    client = AsyncIOMotorClient(settings.database_url)
+    db_name = settings.mongo_db
+    await client.drop_database(db_name)
     print("Database cleared")
 
     brand_serv = BrandService()
@@ -103,4 +108,40 @@ async def seed(iterations: int = 5):
 
 
 if __name__ == "__main__":
+    import os
+    from dotenv import load_dotenv
+
+    val = input("1 - dev : 2 - stage : ")
+    if val == '1':
+        load_dotenv()
+    else:
+        # 1. Загружаем окружение СТРОГО до импортов из app
+        load_dotenv("../staged/.env")
+        os.environ["MONGO_HOST"] = "localhost"
+        os.environ["MONGO_PORT"] = "27018"
+
+
+    from app.core.config import settings
+    import asyncio
+    import random
+    import string
+
+    from faker import Faker
+    from motor.motor_asyncio import AsyncIOMotorClient
+    from app.auth.schemas import UserPermissionsDto
+    from app.auto_models.service import AutoModelService
+    from app.autos.schemas import CarCreate
+    from app.auto_models.schemas import AutoModelCreate, CarCategory
+    from app.autos import CarService
+    from app.brands.schemas import BrandCreate
+    from app.brands.service import BrandService
+    from app.rents.schemas import RentRequest
+    from app.rents.service import RentService
+    from app.users.schemas import UserCreate
+    from app.users.service import UserService
+
+    fake = Faker()
+
+
+
     asyncio.run(seed())
