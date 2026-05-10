@@ -3,6 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from starlette.middleware.cors import CORSMiddleware
 
 from app.users.router import router as users_router
 from app.auth.router import router as auth_router
@@ -37,6 +38,19 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+origins = [
+    "http://localhost:5173", # Стандартный порт Vite
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], # Разрешить все методы (POST, GET и т.д.)
+    allow_headers=["*"], # Разрешить все заголовки
+)
 
 
 # 2. Error logging (Middleware)
