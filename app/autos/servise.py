@@ -22,6 +22,7 @@ class CarService(AbstractService[CarCreate, CarUpdate]):
         return await self.repo.get_all_set(
             brand_ids=filters.get("brand_ids"),
             categories=filters.get("categories"),
+            search=filters.get("search"),
             sort_price=filters.get("sort_price") if filters.get("sort_price") != "none" else None,
             sort_model=filters.get("sort_model") if filters.get("sort_model") != "none" else None,
             hide_inactive=filters.get("hide_inactive"),

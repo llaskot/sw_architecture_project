@@ -63,13 +63,13 @@ class CarRepository(AbstractRepository[Car, CarCreate, CarUpdate]):
     def get_set_pipeline(self,
                          brand_ids: list[str] = None,
                          categories: list[CarCategory] = None,
+                         search: str = None,
                          sort_price: SortOrder = None,  # поле для сортировки
                          sort_model: SortOrder = None,
                          hide_inactive: bool = True,
                          page: int = 1,
                          limit: int = 2
                          ):
-        print(f'{hide_inactive=}')
         pipeline: list[dict] = self.read_pipeline.copy()
 
         # 1. Фильтрация (Match)
@@ -78,6 +78,8 @@ class CarRepository(AbstractRepository[Car, CarCreate, CarUpdate]):
             match_filter["model.brand._id"] = {"$in": [ObjectId(brand) for brand in brand_ids]}
         if categories:
             match_filter["model.category"] = {"$in": categories}
+        if search:
+            match_filter["model.name"] = {"$regex": search, "$options": "i"}
         pipeline.append({"$match": match_filter})
 
         sort_dict = {}
@@ -104,6 +106,7 @@ class CarRepository(AbstractRepository[Car, CarCreate, CarUpdate]):
     async def get_all_set(self,
                           brand_ids: list[str],
                           categories: list[CarCategory],
+                          search: str,
                           sort_price: SortOrder,
                           sort_model: SortOrder,
                           hide_inactive: bool,
@@ -113,6 +116,7 @@ class CarRepository(AbstractRepository[Car, CarCreate, CarUpdate]):
         pipeline: list[dict] = self.get_set_pipeline(
             brand_ids,
             categories,
+            search,
             sort_price,
             sort_model,
             hide_inactive,

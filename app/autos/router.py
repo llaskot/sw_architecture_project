@@ -89,6 +89,7 @@ async def get_all(
             Query(
                 description="Multiple selection enabled. Hold **Ctrl** (Windows) or **Cmd** (Mac) to select several options.")
         ] = None,
+        search: Optional[str] = None,
         # Сортировки
         sort_price: SortOrder = SortOrder.DESC,
         sort_model: SortOrder = SortOrder.ASC,
@@ -102,6 +103,7 @@ async def get_all(
     filters = {
         "brand_ids": brand_ids,
         "categories": categories,
+        'search': search,
         "sort_price": sort_price,
         "sort_model": sort_model,
         "hide_inactive": hide_inactive,
