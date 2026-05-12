@@ -93,7 +93,7 @@ async def get_all(
         sort_price: SortOrder = SortOrder.DESC,
         sort_model: SortOrder = SortOrder.ASC,
         hide_inactive: Annotated[bool, Query(
-                description="For Admins only")] = True,
+            description="For Admins only")] = True,
 
         page: int = 1,
         limit: int = 10,
@@ -108,12 +108,19 @@ async def get_all(
         "page": page,
         "limit": limit,
     }
-    print(filters)
     try:
         return await service.get_all_set(filters)
     except HTTPException as http_ex:
         raise http_ex
-    except IndexError as e:
-        raise HTTPException(status_code=404, detail=f"nothing found/ {str(e)}") from e
+    except IndexError :
+        # raise HTTPException(status_code=404, detail=f"nothing found/ {str(e)}") from e
+        res = {
+            "total": 1,
+            "page": 1,
+            "limit": 10,
+            "items": [],
+        }
+        return AllCarsResponse(**res)
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

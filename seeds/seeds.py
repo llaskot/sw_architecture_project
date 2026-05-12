@@ -63,28 +63,30 @@ async def seed(iterations: int = 5):
         new_brand = await brand_serv.create(brand_dto)
         print(new_brand)
 
-        dto = AutoModelCreate(
-            brand_id=new_brand.id,
-            name=fake.word().capitalize() + random.choice([" X", " Series", " Pro", " GT"]),
-            description="High quality vehicle with " + fake.bs(),
-            category=random.choice(list(CarCategory))
-        )
-        new_model = await model_serv.create(dto)
-        print(new_model)
+        for i in range(10):
+            dto = AutoModelCreate(
+                brand_id=new_brand.id,
+                name=fake.word().capitalize() + random.choice([" X", " Series", " Pro", " GT"]),
+                description="High quality vehicle with " + fake.bs(),
+                category=random.choice(list(CarCategory))
+            )
+            new_model = await model_serv.create(dto)
+            print(new_model)
 
-        car_dto = CarCreate(
-            model_id=new_model.id,
-            # VIN должен быть ровно 17 символов (цифры + заглавные буквы)
-            vin="".join(random.choices(string.ascii_uppercase + string.digits, k=17)),
-            plate_number=fake.unique.bothify(text='?###??###').upper(),
-            year=random.randint(2015, 2024),
-            color=fake.color_name(),
-            mileage=random.randint(0, 100000),
-            price_per_day=float(random.randint(3000, 20000))
-        )
 
-        car = await car_serv.create(car_dto)
-        print(car)
+            car_dto = CarCreate(
+                model_id=new_model.id,
+                # VIN должен быть ровно 17 символов (цифры + заглавные буквы)
+                vin="".join(random.choices(string.ascii_uppercase + string.digits, k=17)),
+                plate_number=fake.unique.bothify(text='?###??###').upper(),
+                year=random.randint(2015, 2024),
+                color=fake.color_name(),
+                mileage=random.randint(0, 100000),
+                price_per_day=float(random.randint(3000, 20000))
+            )
+
+            car = await car_serv.create(car_dto)
+            print(car)
 
 
         rent_dto = RentRequest(
