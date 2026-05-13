@@ -1,29 +1,3 @@
-# import os
-# from dotenv import load_dotenv
-#
-# # 1. Загружаем окружение СТРОГО до импортов из app
-# load_dotenv("../staged/.env")
-#
-# from app.core.config import settings
-# import asyncio
-# import random
-# import string
-#
-# from faker import Faker
-# from motor.motor_asyncio import AsyncIOMotorClient
-# from app.auth.schemas import UserPermissionsDto
-# from app.auto_models.service import AutoModelService
-# from app.autos.schemas import CarCreate
-# from app.auto_models.schemas import AutoModelCreate, CarCategory
-# from app.autos import CarService
-# from app.brands.schemas import BrandCreate
-# from app.brands.service import BrandService
-# from app.rents.schemas import RentRequest
-# from app.rents.service import RentService
-# from app.users.schemas import UserCreate
-# from app.users.service import UserService
-#
-# fake = Faker()
 
 
 async def seed(iterations: int = 5):
@@ -66,7 +40,7 @@ async def seed(iterations: int = 5):
         for i in range(10):
             dto = AutoModelCreate(
                 brand_id=new_brand.id,
-                name=fake.word().capitalize() + random.choice([" X", " Series", " Pro", " GT"]),
+                name=fake.unic.word().capitalize() + random.choice([" X", " Series", " Pro", " GT"]),
                 description="High quality vehicle with " + fake.bs(),
                 category=random.choice(list(CarCategory))
             )

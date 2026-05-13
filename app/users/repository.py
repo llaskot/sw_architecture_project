@@ -21,9 +21,7 @@ class UserRepository(AbstractRepository[User, UserCreate, UserUpdate]):
         })
 
     async def change_password(self, user_id: str, new_pass: str):
-        res =  await self.collect.update_one({"_id": ObjectId(user_id)}, {"$set": {"password": new_pass}})
-        print(res)
-        return res
+        return await self.collect.update_one({"_id": ObjectId(user_id)}, {"$set": {"password": new_pass}})
 
 
 user_repo = UserRepository(db)

@@ -31,7 +31,6 @@ class AbstractService(Generic[CreateSchemaType, UpdateSchemaType]):
 
 
     async def get_by_id(self, item_id: str | ObjectId, hide_inactive: bool = True):
-        print(item_id)
         if isinstance(item_id, str):
             try:
                 item_id = ObjectId(item_id)

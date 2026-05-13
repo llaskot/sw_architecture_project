@@ -20,7 +20,6 @@ async def create_brand(brand_data: BrandCreate, response: Response):
     except DuplicateKeyError as e:
         raise HTTPException(status_code=409, detail='DuplicateFieldError') from e
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=500, detail=str(e)) from e
 #
 #

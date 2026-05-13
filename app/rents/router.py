@@ -25,7 +25,6 @@ async def create_rent(rent_data: RentRequest, user: UserPermissionsDto = Depends
     except DuplicateKeyError as e:
         raise HTTPException(status_code=409, detail='DuplicateFieldError') from e
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 

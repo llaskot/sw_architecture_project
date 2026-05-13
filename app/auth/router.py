@@ -11,7 +11,7 @@ from app.auth.schemas import LoginResponse, ConfirmationCode, LoginDto, Register
 from fastapi import APIRouter
 
 from app.auth.service import AuthService
-from app.mailer.decorators import debug_request_response, confirm_mail
+from app.mailer.decorators import  confirm_mail
 from app.users.schemas import UserRegistrate, UserResponseAdm
 from app.users.service import UserService
 
@@ -54,9 +54,12 @@ async def save_user(data: ConfirmationCode,
     except HTTPException as e:
         raise e from e
     except DuplicateKeyError as e:
+        details = e.details
+        key_value = details.get("keyValue", {})
+        field_name = list(key_value.keys())[0] if key_value else "field"
         raise HTTPException(
             status_code=400,
-            detail=f"User already exists\n{str(e)}") from e
+            detail=f"User already exists! field: {field_name}") from e
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
