@@ -1,8 +1,13 @@
-from typing import  Optional
+from typing import Optional
 
 from bson import ObjectId
-from pydantic import  BaseModel, Field, ConfigDict, field_serializer
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 from pydantic_mongo import ObjectIdField
+
+
+class Pictures(BaseModel):
+    small: str | None = None
+    large: str | None = None
 
 
 class Car(BaseModel):
@@ -26,6 +31,8 @@ class Car(BaseModel):
 
     active: bool = True
 
+    img: Pictures | None = None
+
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         populate_by_name=True
@@ -34,4 +41,5 @@ class Car(BaseModel):
     # @field_serializer("id", "model_id")
     # def serialize_id(self, v: ObjectId, _info):
     #     return str(v) if v else None
+
 

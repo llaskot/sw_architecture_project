@@ -16,6 +16,10 @@ class Settings(BaseSettings):
 
     secret_key: str
     jwt_solt: str
+    upload_dir: str
+
+    expose_host: str
+    expose_app_port: str
 
     # само соберет строку подключения
     @computed_field

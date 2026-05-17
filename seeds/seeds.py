@@ -21,7 +21,7 @@ async def seed(iterations: int = 5):
         user_dto = UserCreate(
             email=fake.unique.email(),
             login=fake.unique.user_name() + '_usr',
-            password="string",
+            password="Aa111111",
             first_name=fake.first_name(),
             last_name=fake.last_name(),
         )
@@ -40,7 +40,7 @@ async def seed(iterations: int = 5):
         for i in range(10):
             dto = AutoModelCreate(
                 brand_id=new_brand.id,
-                name=fake.unic.word().capitalize() + random.choice([" X", " Series", " Pro", " GT"]),
+                name=fake.word().capitalize() + random.choice([" X", " Series", " Pro", " GT"]),
                 description="High quality vehicle with " + fake.bs(),
                 category=random.choice(list(CarCategory))
             )

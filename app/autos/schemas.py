@@ -10,6 +10,7 @@ from pydantic_mongo import ObjectIdField
 from app.auto_models.auto_model_model import CarCategory
 from app.auto_models.schemas import AutoModelRead
 from app.autos import Car
+from app.autos.auto_model import Pictures
 
 ModelID = Annotated[
     ObjectIdField,
@@ -35,6 +36,8 @@ class CarCreate(BaseModel):
     available: bool = True
     in_use: bool = False
 
+    img: str = None
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
@@ -55,6 +58,8 @@ class CarUpdate(BaseModel):
     price_per_day: Optional[float] = Field(None)
     available: Optional[bool] = Field(None)
     in_use: Optional[bool] = Field(None)
+
+    img: Optional[Pictures] = Field(None)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     # active: Optional[bool]  = Field(None)

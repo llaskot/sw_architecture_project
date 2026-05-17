@@ -16,14 +16,21 @@ from .schemas import ConfirmationCode, LoginDto, UserPermissionsDto, PassRestore
 from app.users.repository import user_repo as us_repo
 from app.users.schemas import UserRegistrate, UserCreate
 from app.users.user_model import User
+from ..core import settings
+
 
 class AuthService:
     def __init__(self, user_repo = us_repo):
         self._user_repo = user_repo
         self._generated_key = None
 
-    ENV_PASSPHRASE: Final = os.getenv("SECRET_KEY")
+    ENV_PASSPHRASE: Final = settings.secret_key
     REFRESH_AGE: Final = 48 * 60 * 60
+    ACCESS_AGE: Final = 10 * 60
+
+    # REFRESH_AGE: Final = 3 * 60
+    # ACCESS_AGE: Final = 1 * 60
+
 
     #
     def _get_generated_key(self):
@@ -84,8 +91,8 @@ class AuthService:
         return await self._user_repo.create(user_dto)
 
     def create_token(self, payload: dict):
-        key = os.getenv("JWT_SOLT")
-        payload["exp"] = int(time.time()) + (10 * 60)
+        key = settings.jwt_solt
+        payload["exp"] = int(time.time()) + AuthService.ACCESS_AGE
         access = jwt.encode(payload, key, algorithm="HS256")
         payload["exp"] = int(time.time()) + AuthService.REFRESH_AGE
         refresh = jwt.encode(payload, key, algorithm="HS256")
@@ -93,10 +100,11 @@ class AuthService:
 
     @staticmethod
     def decode_token(token: str) -> UserPermissionsDto | None:
-        key = os.getenv("JWT_SOLT")
+        key = settings.jwt_solt
         try:
             payload = jwt.decode(token, key, algorithms=["HS256"])
-            return UserPermissionsDto.model_validate(payload)
+            res = UserPermissionsDto.model_validate(payload)
+            return res
         except jwt.ExpiredSignatureError:
             return None
         except jwt.InvalidTokenError:
@@ -104,9 +112,10 @@ class AuthService:
 
     async def refresh(self, refresh_token: str):
         payload: UserPermissionsDto = self.decode_token(refresh_token)
-        if payload is None:
+        if not payload:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
-        return await self._user_repo.get_by_id(ObjectId(payload.id))
+        res = await self._user_repo.get_by_id(ObjectId(payload.id))
+        return res
 
     def get_password_hash(self, password: str) -> str:
         pwd_bytes = password.encode('utf-8')
@@ -150,9 +159,9 @@ class AuthService:
         )
         return tokens["access_token"]
 
+
     async def get_restore_code(self, restore_dto: PassRestore):
         res_success = await self._user_repo.find_for_logining(restore_dto)
-
         if not res_success:
             raise HTTPException(
                 status_code=401,
