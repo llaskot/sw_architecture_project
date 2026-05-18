@@ -59,6 +59,20 @@ class UserResponseAdm(BaseModel):
         populate_by_name=True,
         protected_namespaces=()
     )
+
+class ClientResponseAdm(BaseModel):
+    """Client Response schema"""
+    id: ObjectIdField = Field(alias="_id")
+    email: str
+    first_name: str
+    last_name: str
+    active: bool
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        protected_namespaces=()
+    )
 #
 # class UserResponse(UserResponseBasic):
 #     """Полный вариант: всё то же самое + конфиденциальные данные"""

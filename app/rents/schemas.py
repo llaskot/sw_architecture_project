@@ -1,11 +1,13 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, Field,  ConfigDict
+from fastapi import HTTPException
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from pydantic_mongo import ObjectIdField
 
 from app.autos.schemas import CarRead
 from app.rents.rent_model import Rent, RentStage
+from app.users.schemas import ClientResponseAdm
 from app.users.user_model import User
 
 
@@ -26,6 +28,21 @@ class RentRequest(BaseModel):
         from_attributes=True,
         arbitrary_types_allowed=True
     )
+
+    @field_validator("start_date")
+    @classmethod
+    def validate_start_date(cls, val: datetime) -> datetime:
+        current_time = datetime.now(val.tzinfo) if val.tzinfo else datetime.now()
+
+        if val < current_time:
+            # raise ValueError("Start date can not be less than current date")
+            raise HTTPException(
+                status_code=409,
+                detail="Start date can not be less than current date"
+            )
+        return val
+
+
 
 class RentCreate(RentRequest):
     """Create rent schema"""
@@ -73,14 +90,12 @@ class UpdateStage(ChangeStage):
     updated_by: ObjectIdField = Field(..., description="Reference to user collection")
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-
-
-
-
-
-
-
 class RentRead(Rent):
     car: CarRead | None = None
-    client: User | None = None
+    client: ClientResponseAdm | None = None
 
+class AllOwnRentsResponse(BaseModel):
+    total: int
+    page: int
+    limit: int
+    items: list[RentRead]

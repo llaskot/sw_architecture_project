@@ -5,8 +5,8 @@ from bson import ObjectId
 
 from app.abstracts import AbstractRepository
 from app.database import db
-from app.rents.rent_model import Rent
-from app.rents.schemas import RentCreate, RentUpdate, RentRead, ChangeStage
+from app.rents.rent_model import Rent, RentStage
+from app.rents.schemas import RentCreate, RentUpdate, RentRead, ChangeStage, AllOwnRentsResponse
 
 
 class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
@@ -111,14 +111,72 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
         if not documents or len(documents) == 0: return None
         return [self.model.model_validate(doc) for doc in documents]
 
-    async def get_all_own(self, user_id: ObjectId) -> list[Any]:
-        match_stage = {"$match": {}}
-        match_stage["$match"]["active"] = True
-        match_stage["$match"]["client_id"] = user_id
-        full_pipeline = [match_stage] + self.read_pipeline
+
+    def get_set_pipeline(self,
+                         client_id: ObjectId = None,
+                         stage: list[RentStage] = None,
+                         # hide_inactive: bool = True,
+                         sort_date: datetime = None,
+                         page: int = 1,
+                         limit: int = 2
+                         ):
+        pipeline: list[dict] = self.read_pipeline.copy()
+
+        # 1. Фильтрация (Match)
+        match_filter: dict[str, Any] = {"active": True}
+        if client_id:
+            match_filter["client_id"] = client_id
+        if stage:
+            match_filter["stage"] = {"$in": stage}
+
+        pipeline.append({"$match": match_filter})
+
+        sort_dict = {}
+        if sort_date:
+            sort_dict["updated_at"] = -1 if sort_date == "desc" else 1
+        sort_dict["_id"] = 1
+        pipeline.append({"$sort": sort_dict})
+
+        # ПАГИНАЦИЯ
+        skip = (page - 1) * limit
+        pipeline.append({
+            "$facet": {
+                "total_count": [{"$count": "count"}],  # Считаем общее кол-во
+                "data": [  # Забираем кусок данных
+                    {"$skip": skip},
+                    {"$limit": limit}
+                ]
+            }
+        })
+        return pipeline
+
+    async def get_all_own(self,
+                          client_id: ObjectId,
+                          stage: list[RentStage],
+                          # hide_inactive,
+                          sort_date,
+                          page,
+                          limit
+                          ) -> AllOwnRentsResponse:
+
+        full_pipeline: list[dict] = self.get_set_pipeline(
+            client_id,
+            stage,
+            # hide_inactive,
+            sort_date,
+            page,
+            limit
+        )
         cursor = self.collection.aggregate(full_pipeline)
-        documents = await cursor.to_list(length=None)
-        return [self.response_model.model_validate(doc) for doc in documents]
+        res = await cursor.to_list(length=None)
+        total = res[0]["total_count"][0]["count"] if res[0]["total_count"] else 0
+        return AllOwnRentsResponse(
+            total=total,
+            page=page,
+            limit=limit,
+            items=[self.response_model.model_validate(doc) for doc in res[0]["data"]]
+        )
+
 
     # async def update_stage(self, rent_id: ObjectId, changes: ChangeStage) -> Any:
     #     return await self.update(rent_id, changes)

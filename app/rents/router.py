@@ -1,10 +1,11 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Response, Request, HTTPException, Depends, Query, Path
 from pymongo.errors import DuplicateKeyError
 
 from app.auth.dependencies import check_admin, check_token, check_manager
 from app.auth.schemas import UserPermissionsDto
+from app.autos.schemas import SortOrder
 from app.brands.schemas import BrandUpdate, BrandCreate
 from app.brands.service import BrandService
 from app.rents.rent_model import RentStage
@@ -56,12 +57,23 @@ async def get_by_id(rent_id: str, user: UserPermissionsDto = Depends(check_token
 
 @router.get("/")
 async def get_all_rents(
-        hide_inactive: Annotated[bool, Query(
-            description="For Admins only")] = True,
-        user: UserPermissionsDto = Depends(check_token)):
+        # hide_inactive: Annotated[bool, Query(
+        #     description="For Admins only")] = True,
+
+        stage: Annotated[
+            Optional[list[RentStage]],
+            Query(
+                description="Multiple selection enabled. Hold **Ctrl** (Windows) or **Cmd** (Mac) to select several options.")
+        ] = None,
+
+        sort_date: SortOrder = SortOrder.DESC,
+        page: int = 1,
+        limit: int = 10,
+        user: UserPermissionsDto = Depends(check_token)
+        ):
     service = RentService()
     try:
-        return await service.get_all_rents(user, hide_inactive)
+        return await service.get_all_rents(stage, sort_date, page, limit, user)
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:

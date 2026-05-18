@@ -80,8 +80,6 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         await self.repo.update(ObjectId(rent_id), updated_rent)
         return await self.repo.get_by_id(ObjectId(rent_id))
 
-
-
     async def delete_rent(self, rent_id: str) -> Any:
         rent = await self.repo.get_by_id(ObjectId(rent_id))
         if not rent:
@@ -117,14 +115,19 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
     def _is_overlapping(self, start1: datetime, end1: datetime, start2: datetime, end2: datetime) -> bool:
         return start1 <= end2 and start2 <= end1
 
-    async def get_all_rents(self, user_payload: UserPermissionsDto, hide_inactive: bool):
-        if user_payload.is_admin:
-            hide_deleted = hide_inactive
-        else:
-            hide_deleted = True
-        if user_payload.is_admin or user_payload.is_manager:
-            return await self.get_all(hide_deleted)
-        return await self.repo.get_all_own(user_payload.id)
+    async def get_all_rents(self,
+                            stage,
+                            sort_date,
+                            page: int,
+                            limit: int,
+                            user: UserPermissionsDto):
+        # if user_payload.is_admin:
+        #     hide_deleted = hide_inactive
+        # else:
+        #     hide_deleted = True
+        # if user_payload.is_admin or user_payload.is_manager:
+        #     return await self.get_all(hide_deleted)
+        return await self.repo.get_all_own(user.id, stage, sort_date, page, limit)
 
     async def change_stage(self,
                            rent_id: str,
