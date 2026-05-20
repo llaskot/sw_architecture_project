@@ -111,23 +111,28 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
         if not documents or len(documents) == 0: return None
         return [self.model.model_validate(doc) for doc in documents]
 
-
     def get_set_pipeline(self,
-                         client_id: ObjectId = None,
+                         client_id: ObjectId,
                          stage: list[RentStage] = None,
-                         # hide_inactive: bool = True,
                          sort_date: datetime = None,
                          page: int = 1,
-                         limit: int = 2
+                         limit: int = 2,
+                         hide_inactive: bool = True,
+                         car_id: ObjectId = None,
                          ):
         pipeline: list[dict] = self.read_pipeline.copy()
 
         # 1. Фильтрация (Match)
-        match_filter: dict[str, Any] = {"active": True}
+        match_filter = {}
+        if hide_inactive:
+            match_filter["active"] = True
+        if car_id:
+            match_filter["car_id"] = car_id
         if client_id:
             match_filter["client_id"] = client_id
         if stage:
             match_filter["stage"] = {"$in": stage}
+        print("match_filter", match_filter)
 
         pipeline.append({"$match": match_filter})
 
@@ -177,6 +182,34 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
             items=[self.response_model.model_validate(doc) for doc in res[0]["data"]]
         )
 
+    async def get_all_admin(self,
+                            client_id: ObjectId,
+                            car_id: ObjectId,
+                            stage,
+                            hide_inactive,
+                            sort_date,
+                            page: int,
+                            limit: int,
+                            ) -> AllOwnRentsResponse:
+
+        full_pipeline: list[dict] = self.get_set_pipeline(
+            client_id,
+            stage,
+            sort_date,
+            page,
+            limit,
+            hide_inactive,
+            car_id
+        )
+        cursor = self.collection.aggregate(full_pipeline)
+        res = await cursor.to_list(length=None)
+        total = res[0]["total_count"][0]["count"] if res[0]["total_count"] else 0
+        return AllOwnRentsResponse(
+            total=total,
+            page=page,
+            limit=limit,
+            items=[self.response_model.model_validate(doc) for doc in res[0]["data"]]
+        )
 
     # async def update_stage(self, rent_id: ObjectId, changes: ChangeStage) -> Any:
     #     return await self.update(rent_id, changes)

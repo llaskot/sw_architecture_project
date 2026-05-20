@@ -49,18 +49,18 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
 
     async def update_rent(self, rent_id: str, rent_req_dto: RentUpdateRequest, user_payload: UserPermissionsDto) -> Any:
         rent = await self.repo.get_by_id(ObjectId(rent_id))
+        # print("111111111111", rent)
         if not rent or not rent.active:
             raise HTTPException(status_code=404, detail="Rent not found")
 
         if not (user_payload.is_manager or user_payload.is_admin) and rent.client_id != user_payload.id:
             raise HTTPException(status_code=404, detail="Rent not found")
-
+        # print("222222")
         if not (user_payload.is_manager or user_payload.is_admin) and rent.stage != "ordered":
             raise HTTPException(status_code=409, detail="Rent already confirmed")
 
         if user_payload.is_manager and rent.stage not in ("ordered", "refused", 'booked'):
             raise HTTPException(status_code=409, detail="Rent already payd")
-
         updated_rent = RentUpdate(
             **rent_req_dto.model_dump(),
         )
@@ -69,9 +69,13 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
             return await self.repo.get_by_id(ObjectId(rent_id))
         car_id = updated_rent.car_id or rent.car_id
         new_car = await self.car_repo.get_by_id(car_id)
+        print("2222222", car_id)
         future_rents = await self.repo.get_by_car_id(car_id)
-        future_rents = [r for r in future_rents if r.id != rent.id]
+        print("33333333", future_rents)
+
+        future_rents = [r for r in future_rents if r.id != rent.id] if future_rents else []
         updated_rent.total_price = (updated_rent.days_qty or rent.days_qty) * new_car.price_per_day
+
         updated_rent.start_date = (updated_rent.start_date or rent.start_date)
         updated_rent.end_date = ((updated_rent.start_date or rent.start_date)
                                  + timedelta(days=(updated_rent.days_qty or rent.days_qty)))
@@ -121,31 +125,48 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
                             page: int,
                             limit: int,
                             user: UserPermissionsDto):
-        # if user_payload.is_admin:
-        #     hide_deleted = hide_inactive
-        # else:
-        #     hide_deleted = True
-        # if user_payload.is_admin or user_payload.is_manager:
-        #     return await self.get_all(hide_deleted)
         return await self.repo.get_all_own(user.id, stage, sort_date, page, limit)
 
-    async def change_stage(self,
-                           rent_id: str,
-                           stage: RentStage,
-                           body: ChangeStage,
-                           user: UserPermissionsDto):
-        rent: RentRead = await self.repo.get_by_id(ObjectId(rent_id))
-        if not rent:
-            raise HTTPException(status_code=404, detail="Rent not found")
-        changes = UpdateStage(
-            **body.model_dump(),
-            updated_by=user.id,
-            stage=stage
+    async def get_all_admin_rents(self,
+                                  stage,
+                                  car_id: str,
+                                  client_id: str,
+                                  hide_inactive,
+                                  sort_date,
+                                  page: int,
+                                  limit: int,
+                                  user: UserPermissionsDto):
+        inactive = hide_inactive if user.is_admin else True
+        return await self.repo.get_all_admin(
+            client_id=ObjectId(client_id) if client_id else None,
+            car_id=ObjectId(car_id) if car_id else None,
+            stage=stage,
+            hide_inactive=inactive,
+            sort_date=sort_date,
+            page=page,
+            limit=limit,
         )
-        res = await self.repo.update(ObjectId(rent_id), changes)
-        if not rent.car.available and stage != "ordered":
-            car_changes = CarUpdate(
-                available=True
+
+        async def change_stage(self,
+                               rent_id: str,
+                               stage: RentStage,
+                               body: ChangeStage,
+                               user: UserPermissionsDto):
+            rent: RentRead = await self.repo.get_by_id(ObjectId(rent_id))
+            if not rent:
+                raise HTTPException(status_code=404, detail="Rent not found")
+            changes = UpdateStage(
+                **body.model_dump(),
+                updated_by=user.id,
+                stage=stage
             )
-            await self.car_repo.update(ObjectId(rent.car_id), car_changes)
-        return res
+            res = await self.repo.update(ObjectId(rent_id), changes)
+            if not rent.car.available and stage != "ordered":
+                car_changes = CarUpdate(
+                    available=True
+                )
+                await self.car_repo.update(ObjectId(rent.car_id), car_changes)
+            return res
+
+        async def get_stages(self):
+            return [stage.value for stage in RentStage]
