@@ -73,6 +73,13 @@ class ClientResponseAdm(BaseModel):
         populate_by_name=True,
         protected_namespaces=()
     )
+
+
+class AllUsersResponse(BaseModel):
+    total: int
+    page: int
+    limit: int
+    items: list[UserResponseAdm]
 #
 # class UserResponse(UserResponseBasic):
 #     """Полный вариант: всё то же самое + конфиденциальные данные"""

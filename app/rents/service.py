@@ -147,26 +147,26 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
             limit=limit,
         )
 
-        async def change_stage(self,
-                               rent_id: str,
-                               stage: RentStage,
-                               body: ChangeStage,
-                               user: UserPermissionsDto):
-            rent: RentRead = await self.repo.get_by_id(ObjectId(rent_id))
-            if not rent:
-                raise HTTPException(status_code=404, detail="Rent not found")
-            changes = UpdateStage(
-                **body.model_dump(),
-                updated_by=user.id,
-                stage=stage
+    async def change_stage(self,
+                           rent_id: str,
+                           stage: RentStage,
+                           body: ChangeStage,
+                           user: UserPermissionsDto):
+        rent: RentRead = await self.repo.get_by_id(ObjectId(rent_id))
+        if not rent:
+            raise HTTPException(status_code=404, detail="Rent not found")
+        changes = UpdateStage(
+            **body.model_dump(),
+            updated_by=user.id,
+            stage=stage
+        )
+        res = await self.repo.update(ObjectId(rent_id), changes)
+        if not rent.car.available and stage != "ordered":
+            car_changes = CarUpdate(
+                available=True
             )
-            res = await self.repo.update(ObjectId(rent_id), changes)
-            if not rent.car.available and stage != "ordered":
-                car_changes = CarUpdate(
-                    available=True
-                )
-                await self.car_repo.update(ObjectId(rent.car_id), car_changes)
-            return res
+            await self.car_repo.update(ObjectId(rent.car_id), car_changes)
+        return res
 
-        async def get_stages(self):
-            return [stage.value for stage in RentStage]
+    async def get_stages(self):
+        return [stage.value for stage in RentStage]

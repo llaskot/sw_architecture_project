@@ -1,6 +1,7 @@
 import bcrypt
 
 from app.abstracts import AbstractService
+from app.auth.schemas import UserPermissionsDto
 from app.users.repository import user_repo
 from app.users.schemas import UserCreate, UserUpdate
 
@@ -19,3 +20,13 @@ class UserService(AbstractService[UserCreate, UserUpdate]):
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(pwd_bytes, salt)
         return hashed_password.decode('utf-8')
+
+    async def get_all_search(self,
+                             search: str,
+                             hide_inactive: bool,
+                             page: int,
+                             limit: int,
+                             user: UserPermissionsDto):
+        inactive = hide_inactive if user.is_admin else True
+        return await self.repo.get_all_search(search, inactive, page, limit)
+

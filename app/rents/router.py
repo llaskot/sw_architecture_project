@@ -37,6 +37,7 @@ async def get_all_admin_rents(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
+
 @router.get("/stages", response_model=list[str])
 async def get_stages():
     service = RentService()
@@ -139,6 +140,3 @@ async def change_stage(rent_id: str,
         raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-
