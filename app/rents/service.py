@@ -49,7 +49,6 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
 
     async def update_rent(self, rent_id: str, rent_req_dto: RentUpdateRequest, user_payload: UserPermissionsDto) -> Any:
         rent = await self.repo.get_by_id(ObjectId(rent_id))
-        # print("111111111111", rent)
         if not rent or not rent.active:
             raise HTTPException(status_code=404, detail="Rent not found")
 
@@ -161,11 +160,11 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
             stage=stage
         )
         res = await self.repo.update(ObjectId(rent_id), changes)
-        if not rent.car.available and stage != "ordered":
-            car_changes = CarUpdate(
-                available=True
-            )
-            await self.car_repo.update(ObjectId(rent.car_id), car_changes)
+        # if not rent.car.available and stage != "ordered":
+        #     car_changes = CarUpdate(
+        #         available=True
+        #     )
+        #     await self.car_repo.update(ObjectId(rent.car_id), car_changes)
         return res
 
     async def get_stages(self):
