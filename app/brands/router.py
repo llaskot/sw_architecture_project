@@ -1,11 +1,35 @@
 from fastapi import APIRouter, Response, Request, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
-from app.auth.dependencies import check_admin
+from app.auth.dependencies import check_admin, check_manager
+from app.auth.schemas import UserPermissionsDto
 from app.brands.schemas import BrandUpdate, BrandCreate
 from app.brands.service import BrandService
 
 router = APIRouter(prefix="/brand", tags=["Brands"])
+
+
+@router.get("/admin/")
+async def get_all_admin(hide_inactive: bool = True, user: UserPermissionsDto = Depends(check_manager)):
+    service = BrandService()
+    try:
+        return await service.get_all(hide_inactive if user.is_admin else True)
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/admin/{brand_id}")
+async def get_by_id(brand_id: str, user: UserPermissionsDto = Depends(check_manager)):
+    service = BrandService()
+    try:
+        return await service.get_by_id(brand_id, False if user.is_admin else True)
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
 
 @router.post("/",  dependencies=[Depends(check_admin)])
 async def create_brand(brand_data: BrandCreate, response: Response):

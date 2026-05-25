@@ -49,26 +49,22 @@ class AbstractRepository(Generic[T, CreateSchema, UpdateSchema]):
         if hide_inactive:
             match_stage["$match"]["active"] = True
         if pipeline:
-            # Если нашли пайплайн в наследнике — ебашим агрегацию
             cursor = self.collection.aggregate([match_stage] + pipeline)
             result = await cursor.to_list(length=1)
             document = result[0] if result else None
         else:
-            # Если нет — обычный find_one
             document = await self.collection.find_one(match_stage["$match"])
 
         if document is None: return None
         return self.response_model.model_validate(document)
 
 
-    async def update(self, item_id: ObjectId, update_dto: UpdateSchema, hide_inactive: bool = None) -> Optional[T]:
+    async def update(self, item_id: ObjectId, update_dto: UpdateSchema, hide_inactive: bool = True) -> Optional[T]:
         query = {"_id": item_id}
-        if hide_inactive is None:
+        if hide_inactive :
             query["active"] = True
-        else:
-            query["active"] = hide_inactive
+
         update_data = update_dto.model_dump(exclude_unset=True,
-                                            # exclude_none=True,
                                             mode='python',
                                             by_alias=True)
         updated_item = await self.collection.find_one_and_update(

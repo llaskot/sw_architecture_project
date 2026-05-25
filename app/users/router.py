@@ -46,14 +46,18 @@ async def get_profile(user: UserPermissionsDto = Depends(check_token)):
 
 
 
-@router.get("/{user_id}", response_model=UserResponseAdm, dependencies=[Depends(check_manager)])
-async def get_user(user_id: str):
+@router.get("/{user_id}", response_model=UserResponseAdm)
+async def get_user(user_id: str, user: UserPermissionsDto = Depends(check_manager)):
     """
     Manager or Admin only
     """
+    if user.is_admin:
+        hide_inactive = False
+    else:
+        hide_inactive = True
     service = UserService()
     try:
-        return await service.get_by_id(user_id)
+        return await service.get_by_id(user_id, hide_inactive)
     except HTTPException as e:
         raise e from e
     except Exception as e:
@@ -105,14 +109,14 @@ async def update_profile(user_data: UserUpdateShort, user: UserPermissionsDto = 
 
 
 
-@router.patch("/{user_id}", response_model=UserResponseAdm, dependencies=[Depends(check_manager)])
+@router.patch("/{user_id}", response_model=UserResponseAdm, dependencies=[Depends(check_admin)])
 async def update_user(user_id: str, user_data: UserUpdate):
     """
     Admin only
     """
     service = UserService()
     try:
-        return await service.update(user_id, user_data)
+        return await service.update(user_id, user_data, False)
     except HTTPException as http_ex:
         raise http_ex
     except DuplicateKeyError as e:

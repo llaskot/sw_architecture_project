@@ -15,4 +15,4 @@ class BrandUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1)
     country: Optional[str] = Field(None, min_length=3)
     description: Optional[str] = Field(None, min_length=6)
-    # active: Optional[bool]  = Field(None)
+    active: Optional[bool]  = Field(None)

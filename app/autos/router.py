@@ -30,13 +30,13 @@ async def create_car(car_data: CarCreate, response: Response):
 
 
 @router.patch("/{car_id}", dependencies=[Depends(check_admin)])
-async def update_car(car_id: str, model_data: CarUpdate, response: Response):
+async def update_car(car_id: str, car_data: CarUpdate, response: Response):
     """
     Admin ONLY
     """
     service = CarService()
     try:
-        return await service.update(car_id, model_data)
+        return await service.update(car_id, car_data)
     except HTTPException as http_ex:
         raise http_ex
     except DuplicateKeyError as e:
@@ -50,6 +50,17 @@ async def get_by_id(car_id: str):
     service = CarService()
     try:
         return await service.get_by_id(car_id)
+    except HTTPException as http_ex:
+        raise http_ex
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/adm/{car_id}")
+async def get_by_id_adm(car_id: str):
+    service = CarService()
+    try:
+        return await service.get_by_id(car_id, False)
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:

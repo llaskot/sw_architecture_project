@@ -34,6 +34,7 @@ class AutoModelUpdate(BaseModel):
     brand_id: Optional[ObjectIdField] = Field(None, description="exists brand ID")
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str] = Field(None, min_length=6)
+    active: Optional[bool] = Field(None, description="is active")
     category: Optional[CarCategory] = Field(
         None,
         description="Allowed: economy, standard, business, premium, luxury, suv",

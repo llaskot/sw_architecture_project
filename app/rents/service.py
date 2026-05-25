@@ -7,7 +7,7 @@ from watchfiles import awatch
 
 from app.abstracts import AbstractService
 from app.auth.schemas import UserPermissionsDto
-from app.autos import car_repo as cr
+from app.autos import car_repo as cr, Car
 from app.autos.repository import CarRepository
 from app.autos.schemas import CarUpdate
 from app.rents.rent_model import Rent, RentStage
@@ -30,58 +30,68 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         user = await self.user_repo.get_by_id(client_id)
         if not user or not user.active:
             raise HTTPException(status_code=404, detail="User not found")
-        # car_upd_dto = CarUpdate(
-        #     available=False
-        # )
+
         rent = RentCreate(
             **rent_req_dto.model_dump(),
             client_id=client_id,
             total_price=rent_req_dto.days_qty * car.price_per_day,
             end_date=rent_req_dto.start_date + timedelta(days=rent_req_dto.days_qty)
         )
-        future_rents = await self.repo.get_by_car_id(car.id)
-        if future_rents:
-            self._check_is_overlapping(rent.start_date, rent.end_date, future_rents)
 
-        # await self.car_repo.update(rent_req_dto.car_id, car_upd_dto)
+        await self._check_availability(car.id, rent)
         rent = await self.repo.create(rent)
         return rent
 
     async def update_rent(self, rent_id: str, rent_req_dto: RentUpdateRequest, user_payload: UserPermissionsDto) -> Any:
-        rent = await self.repo.get_by_id(ObjectId(rent_id))
+        rent: RentRead = await self.repo.get_by_id(ObjectId(rent_id))
         if not rent or not rent.active:
             raise HTTPException(status_code=404, detail="Rent not found")
-
         if not (user_payload.is_manager or user_payload.is_admin) and rent.client_id != user_payload.id:
             raise HTTPException(status_code=404, detail="Rent not found")
-        # print("222222")
         if not (user_payload.is_manager or user_payload.is_admin) and rent.stage != "ordered":
             raise HTTPException(status_code=409, detail="Rent already confirmed")
-
         if user_payload.is_manager and rent.stage not in ("ordered", "refused", 'booked'):
             raise HTTPException(status_code=409, detail="Rent already payd")
+
         updated_rent = RentUpdate(
             **rent_req_dto.model_dump(),
         )
+
+        # get info about actual car
+        car_id = updated_rent.car_id or rent.car_id
+        new_car: Car = await self.car_repo.get_by_id(car_id)
+        if not new_car or not new_car.active:
+            raise HTTPException(status_code=404, detail="Car not found")
+        if not new_car.available:
+            raise HTTPException(status_code=409, detail="Car is not available")
+
+        # if important fields has not been changed
         if not (updated_rent.start_date or updated_rent.end_date or updated_rent.car_id):
             await self.repo.update(ObjectId(rent_id), updated_rent)
             return await self.repo.get_by_id(ObjectId(rent_id))
-        car_id = updated_rent.car_id or rent.car_id
-        new_car = await self.car_repo.get_by_id(car_id)
-        print("2222222", car_id)
-        future_rents = await self.repo.get_by_car_id(car_id)
-        print("33333333", future_rents)
 
-        future_rents = [r for r in future_rents if r.id != rent.id] if future_rents else []
         updated_rent.total_price = (updated_rent.days_qty or rent.days_qty) * new_car.price_per_day
-
         updated_rent.start_date = (updated_rent.start_date or rent.start_date)
         updated_rent.end_date = ((updated_rent.start_date or rent.start_date)
                                  + timedelta(days=(updated_rent.days_qty or rent.days_qty)))
-        if future_rents:
-            self._check_is_overlapping(updated_rent.start_date, updated_rent.end_date, future_rents)
+
+        await self._check_availability(car_id, updated_rent, rent.id)
         await self.repo.update(ObjectId(rent_id), updated_rent)
         return await self.repo.get_by_id(ObjectId(rent_id))
+
+    async def _check_availability(self, checked_car_id, updated_rent: RentUpdate | RentCreate, rent_id: ObjectId = None):
+        future_rents = await self.repo.get_by_car_id(checked_car_id)
+        if not future_rents:
+            return
+        important_future_rents = []
+        for future_rent in future_rents:
+            if rent_id and rent_id == updated_rent.car_id:
+                continue
+            if future_rent.stage in ["ordered", "refused", "closed"]:
+                continue
+            important_future_rents.append(future_rent)
+        self._check_is_overlapping(updated_rent.start_date, updated_rent.end_date, important_future_rents)
+
 
     async def delete_rent(self, rent_id: str) -> Any:
         rent = await self.repo.get_by_id(ObjectId(rent_id))
