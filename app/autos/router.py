@@ -93,8 +93,8 @@ async def get_all(
         ] = None,
         search: Optional[str] = None,
         # Сортировки
-        sort_price: SortOrder = SortOrder.DESC,
-        sort_model: SortOrder = SortOrder.ASC,
+        sort_price: SortOrder = None,
+        sort_model: SortOrder = None,
         hide_inactive: Annotated[bool, Query(
             description="For Admins only")] = True,
 
