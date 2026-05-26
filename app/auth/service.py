@@ -154,7 +154,7 @@ class AuthService:
             value=tokens["refresh_token"],
             httponly=True,
             samesite="lax",
-            path="/auth/refresh",
+            # path="/auth/refresh",
             max_age=self.REFRESH_AGE
         )
         return tokens["access_token"]

@@ -29,7 +29,7 @@ def registrate_user(user_data: UserRegistrate, response: Response):
             value=token,
             httponly=True,
             samesite="lax",
-            path="/auth",
+            # path="/auth",
             max_age=1200
         )
         return {"success": True, "cod_for_test": code, "email": user_data.email}
@@ -105,7 +105,7 @@ async def login(data: LoginDto,
 async def logout(response: Response):
     response.delete_cookie(
         key="refresh_token",
-        path="/auth/refresh",
+        # path="/auth/refresh",
         httponly=True,
         samesite="lax"
     )
@@ -123,7 +123,7 @@ async def restore_password(user_data: PassRestore, response: Response):
             value=token,
             httponly=True,
             samesite="lax",
-            path="/auth/restore/confirm",
+            # path="/auth/restore/confirm",
             max_age=1200
         )
         return {"success": True, "cod_for_test": code, "email": email}
