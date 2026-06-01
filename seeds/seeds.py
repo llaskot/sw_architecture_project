@@ -1,3 +1,6 @@
+import bcrypt
+
+
 
 
 # async def seed(iterations: int = 5):
@@ -81,6 +84,7 @@
 #         print(new_rent)
 
 
+
 async def seed(iterations: int = 5):
     client = AsyncIOMotorClient(settings.database_url)
     db_name = settings.mongo_db
@@ -93,6 +97,24 @@ async def seed(iterations: int = 5):
     car_serv = CarService()
     user_serv = UserService()
     remt_serv = RentService()
+
+    pwd_bytes = settings.first_admin_pass.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
+
+    await db["users"].insert_one({
+        "email": settings.first_admin_mail,
+        "login": settings.first_admin_login,
+        "password": hashed_password,
+        "first_name": settings.first_admin_name or "Admin",
+        "last_name": "Admin",
+        "active": True,
+        "is_admin": True,
+        "is_manager": False
+    })
+    print("🚀 First admin user created via database setup")
+
+
 
     # Фиксированный каталог
     brands_catalog = [
@@ -189,6 +211,7 @@ if __name__ == "__main__":
         os.environ["MONGO_PORT"] = "27018"
 
 
+
     from app.core.config import settings
     import asyncio
     import random
@@ -196,7 +219,7 @@ if __name__ == "__main__":
 
     from faker import Faker
     from motor.motor_asyncio import AsyncIOMotorClient
-    from app.auth.schemas import UserPermissionsDto
+    from app.users import UserPermissionsDto
     from app.auto_models.service import AutoModelService
     from app.autos.schemas import CarCreate
     from app.auto_models.schemas import AutoModelCreate, CarCategory
@@ -207,6 +230,7 @@ if __name__ == "__main__":
     from app.rents.service import RentService
     from app.users.schemas import UserCreate
     from app.users.service import UserService
+    from app.database import db
 
     fake = Faker()
 

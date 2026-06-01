@@ -7,6 +7,7 @@ from .schemas import LoginResponse, ConfirmationCode,  RegisterResponse, PassRes
 from .service import AuthService
 from app.mailer import  confirm_mail
 from app.users import UserRegistrate, LoginDto
+from app.core import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentification"])
 
@@ -22,7 +23,7 @@ def registrate_user(user_data: UserRegistrate, response: Response):
             value=token,
             httponly=True,
             samesite="lax",
-            # path="/auth",
+            path=settings.vite_api_url+"/auth",
             max_age=1200
         )
         return {"success": True, "cod_for_test": code, "email": user_data.email}
@@ -98,7 +99,7 @@ async def login(data: LoginDto,
 async def logout(response: Response):
     response.delete_cookie(
         key="refresh_token",
-        # path="/auth/refresh",
+        path=settings.vite_api_url+"/auth/refresh",
         httponly=True,
         samesite="lax"
     )
@@ -116,7 +117,7 @@ async def restore_password(user_data: PassRestore, response: Response):
             value=token,
             httponly=True,
             samesite="lax",
-            # path="/auth/restore/confirm",
+            path=settings.vite_api_url+"/auth/restore/confirm",
             max_age=1200
         )
         return {"success": True, "cod_for_test": code, "email": email}

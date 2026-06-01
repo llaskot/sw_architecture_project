@@ -151,7 +151,7 @@ class AuthService:
             value=tokens["refresh_token"],
             httponly=True,
             samesite="lax",
-            # path="/auth/refresh",
+            path= settings.vite_api_url+"/auth/refresh",
             max_age=self.REFRESH_AGE
         )
         return tokens["access_token"]

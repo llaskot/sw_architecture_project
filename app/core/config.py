@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     expose_host: str
     expose_app_port: str
 
+    vite_api_url: str
+
+    first_admin_login: str | None = None
+    first_admin_pass: str | None = None
+    first_admin_mail: str | None = None
+    first_admin_name: str | None = None
+
     # само соберет строку подключения
     @computed_field
     @property
