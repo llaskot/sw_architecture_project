@@ -4,7 +4,6 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, field_serializer, ConfigDict, Field
 from pydantic_mongo import ObjectIdField
 
-from app.brands.brand_model import Brand
 
 class CarCategory(str, Enum):
     ECONOMY = "economy"
@@ -27,9 +26,6 @@ class AutoModel(BaseModel):
         arbitrary_types_allowed=True,
         populate_by_name=True
     )
-    #
-    # @field_serializer("id", "brand_id")
-    # def serialize_id(self, v: ObjectId, _info):
-    #     return str(v) if v else None
+
 
 

@@ -3,7 +3,7 @@ from typing import Union, Optional
 from pydantic import EmailStr, Field, BaseModel, ConfigDict
 from pydantic_mongo import ObjectIdField
 
-from app.users.schemas import UserResponseAdm
+from app.users import UserResponseAdm
 
 
 class ConfirmationCode(BaseModel):

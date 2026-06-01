@@ -1,8 +1,7 @@
-# from app.auto_models import AutoModel
-from app.abstracts.abstract_repository import AbstractRepository
-from app.auto_models.auto_model_model import AutoModel
-from app.auto_models.schemas import AutoModelUpdate, AutoModelCreate, AutoModelRead
+from .auto_model_model import AutoModel
+from .schemas import AutoModelUpdate, AutoModelCreate, AutoModelRead
 from app.database import db
+from app.abstracts import AbstractRepository
 
 
 class AutoModelRepository(AbstractRepository[AutoModel, AutoModelCreate, AutoModelUpdate]):

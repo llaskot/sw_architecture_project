@@ -1,16 +1,14 @@
-# from beanie import PydanticObjectId
-from bson import ObjectId
-from fastapi import APIRouter, Response, Request, HTTPException, Depends
+from fastapi import APIRouter, Response,  HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
-from app.auth.dependencies import check_admin, check_manager
-from app.auth.schemas import UserPermissionsDto
-#
-from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate
-from app.auto_models.service import AutoModelService
+from .schemas import AutoModelCreate, AutoModelUpdate
+from .service import AutoModelService
 
-#
-#
+from app.auth import check_admin, check_manager
+from app.auth import UserPermissionsDto
+
+
+
 router = APIRouter(prefix="/models", tags=["Auto Model"])
 
 

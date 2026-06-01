@@ -1,15 +1,12 @@
-# from .schemas import UserCreate, UserResponse, UserPermissionsDto
-# from .user_model import User
-# from .service import UserService
-# from .repository import user_repo
-#
-# get_user_by_id = UserService.get_user_by_id
-#
-# __all__ = [
-#     "UserCreate",
-#     "UserResponse",
-#     "UserPermissionsDto",
-#     "User",
-#     "get_user_by_id",
-#     "user_repo",
-# ]
+from .schemas import UserCreate, UserResponseAdm, UserRegistrate
+from .repository import user_repo
+from .user_model import User
+
+
+__all__ = [
+    "UserCreate",
+    "UserResponseAdm",
+    "UserRegistrate",
+    "user_repo",
+    "User",
+]

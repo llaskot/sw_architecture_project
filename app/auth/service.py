@@ -1,7 +1,6 @@
 import json
 import base64
 import hashlib
-import os
 import secrets
 import time
 from typing import Final
@@ -13,10 +12,10 @@ from cryptography.fernet import Fernet
 from fastapi import HTTPException, Response
 
 from .schemas import ConfirmationCode, LoginDto, UserPermissionsDto, PassRestore, ChangePassword
-from app.users.repository import user_repo as us_repo
-from app.users.schemas import UserRegistrate, UserCreate
-from app.users.user_model import User
-from ..core import settings
+from app.users import UserRegistrate, UserCreate, User
+from app.core import settings
+from app.users import user_repo as us_repo
+
 
 
 class AuthService:
@@ -25,7 +24,7 @@ class AuthService:
         self._generated_key = None
 
     ENV_PASSPHRASE: Final = settings.secret_key
-    REFRESH_AGE: Final = 48 * 60 * 60
+    REFRESH_AGE: Final = 24 * 60 * 60
     ACCESS_AGE: Final = 10 * 60
 
     # REFRESH_AGE: Final = 3 * 60
@@ -45,7 +44,6 @@ class AuthService:
 
     def _encrypt_registration_data(self, user_data: UserRegistrate | dict, code: str) -> str:
         if isinstance(user_data, UserRegistrate):
-        # Конвертируем DTO в обычный словарь
             user_dict = user_data.model_dump()
         else:
             user_dict = user_data
@@ -71,7 +69,6 @@ class AuthService:
 
     #
     def _generate_verification_code(self) -> str:
-        # generate confirm code 100 000 - 999 999
         return str(secrets.randbelow(900000) + 100000)
 
     #
