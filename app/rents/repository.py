@@ -3,11 +3,10 @@ from typing import Any
 
 from bson import ObjectId
 
+from .rent_model import Rent, RentStage
+from .schemas import RentCreate, RentUpdate, RentRead,  AllOwnRentsResponse
 from app.abstracts import AbstractRepository
 from app.database import db
-from app.rents.rent_model import Rent, RentStage
-from app.rents.schemas import RentCreate, RentUpdate, RentRead, ChangeStage, AllOwnRentsResponse
-
 
 class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
     def __init__(self, db):
@@ -167,7 +166,6 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
         full_pipeline: list[dict] = self.get_set_pipeline(
             client_id,
             stage,
-            # hide_inactive,
             sort_date,
             page,
             limit
@@ -211,8 +209,7 @@ class RentRepository(AbstractRepository[Rent, RentCreate, RentUpdate]):
             items=[self.response_model.model_validate(doc) for doc in res[0]["data"]]
         )
 
-    # async def update_stage(self, rent_id: ObjectId, changes: ChangeStage) -> Any:
-    #     return await self.update(rent_id, changes)
+
 
 
 rent_repo = RentRepository(db)

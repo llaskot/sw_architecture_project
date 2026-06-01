@@ -1,16 +1,17 @@
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Response, Request, HTTPException, Depends, Query, Path
+from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from pymongo.errors import DuplicateKeyError
 
-from app.auth.dependencies import check_admin, check_token, check_manager
-from app.autos.schemas import SortOrder
-from app.rents.rent_model import RentStage
-from app.rents.schemas import RentCreate, RentRead, RentRequest, RentUpdateRequest, ChangeStage, AllOwnRentsResponse
-from app.rents.service import RentService
+from .rent_model import RentStage
+from .schemas import RentRead, RentRequest, RentUpdateRequest, ChangeStage, AllOwnRentsResponse
+from .service import RentService
 from app.users import UserPermissionsDto
+from app.auth import check_admin, check_token, check_manager
+from app.autos import SortOrder
 
 router = APIRouter(prefix="/rent", tags=["Rents"])
+
 
 @router.get("/admin", response_model=AllOwnRentsResponse, )
 async def get_all_admin_rents(

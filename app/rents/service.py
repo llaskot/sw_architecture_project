@@ -4,16 +4,13 @@ from typing import Any
 from bson import ObjectId
 from fastapi import HTTPException
 
-from app.abstracts import AbstractService
-from app.autos import car_repo as cr, Car
-from app.autos.repository import CarRepository
-from app.autos.schemas import CarUpdate
-from app.rents.rent_model import Rent, RentStage
-from app.rents.repository import rent_repo as rr, RentRepository
-from app.rents.schemas import RentCreate, RentUpdate, RentRead, RentRequest, RentUpdateRequest, ChangeStage, UpdateStage
-from app.users import UserPermissionsDto
-from app.users.repository import user_repo as ur, UserRepository
 
+from .rent_model import Rent, RentStage
+from .repository import rent_repo as rr, RentRepository
+from .schemas import RentCreate, RentUpdate, RentRead, RentRequest, RentUpdateRequest, ChangeStage, UpdateStage
+from app.users import UserPermissionsDto, user_repo as ur, UserRepository
+from app.abstracts import AbstractService
+from app.autos import car_repo as cr, Car, CarRepository, CarUpdate
 
 class RentService(AbstractService[RentCreate, RentUpdate]):
     def __init__(self, rent_repo: RentRepository = rr, user_repo: UserRepository = ur, car_repo: CarRepository = cr):
@@ -78,7 +75,8 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
         await self.repo.update(ObjectId(rent_id), updated_rent)
         return await self.repo.get_by_id(ObjectId(rent_id))
 
-    async def _check_availability(self, checked_car_id, updated_rent: RentUpdate | RentCreate, rent_id: ObjectId = None):
+    async def _check_availability(self, checked_car_id, updated_rent: RentUpdate | RentCreate,
+                                  rent_id: ObjectId = None):
         future_rents = await self.repo.get_by_car_id(checked_car_id)
         if not future_rents:
             return
@@ -90,7 +88,6 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
                 continue
             important_future_rents.append(future_rent)
         self._check_is_overlapping(updated_rent.start_date, updated_rent.end_date, important_future_rents)
-
 
     async def delete_rent(self, rent_id: str) -> Any:
         rent = await self.repo.get_by_id(ObjectId(rent_id))
@@ -169,11 +166,6 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
             stage=stage
         )
         res = await self.repo.update(ObjectId(rent_id), changes)
-        # if not rent.car.available and stage != "ordered":
-        #     car_changes = CarUpdate(
-        #         available=True
-        #     )
-        #     await self.car_repo.update(ObjectId(rent.car_id), car_changes)
         return res
 
     async def get_stages(self):

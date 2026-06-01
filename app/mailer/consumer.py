@@ -1,6 +1,6 @@
 import asyncio
 
-from app.mailer.mailer import Mailer
+from .mailer import Mailer
 
 dispatcher = asyncio.Queue()
 

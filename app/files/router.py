@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from pymongo.errors import DuplicateKeyError
 
-from app.auth.dependencies import check_admin
-from app.files.service import FileService
+from .service import FileService
+from app.auth import check_admin
 
 router = APIRouter(prefix="/files", tags=["Files"])
 

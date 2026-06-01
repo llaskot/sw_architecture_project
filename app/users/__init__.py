@@ -1,5 +1,5 @@
-from .schemas import UserCreate, UserResponseAdm, UserRegistrate, LoginDto, UserPermissionsDto
-from .repository import user_repo
+from .schemas import UserCreate, UserResponseAdm, UserRegistrate, LoginDto, UserPermissionsDto, ClientResponseAdm
+from .repository import user_repo, UserRepository
 from .user_model import User
 
 
@@ -11,4 +11,6 @@ __all__ = [
     "User",
     "LoginDto",
     "UserPermissionsDto",
+    'ClientResponseAdm',
+    "UserRepository",
 ]

@@ -1,7 +1,6 @@
-from typing import Annotated, Optional
+from typing import Optional
 
-from bson import ObjectId
-from pydantic import EmailStr, BaseModel, ConfigDict, field_serializer, Field
+from pydantic import EmailStr, BaseModel, ConfigDict, Field
 from pydantic_mongo import ObjectIdField
 
 
@@ -22,9 +21,4 @@ class User(BaseModel):
         populate_by_name=True,
         from_attributes=True
     )
-
-    # @field_serializer("id")
-    # def serialize_id(self, v: ObjectId, _info):
-    #     return str(v) if v else None
-
 

@@ -2,7 +2,7 @@ import asyncio
 
 from functools import wraps
 
-from app.mailer.consumer import dispatcher
+from .consumer import dispatcher
 
 
 

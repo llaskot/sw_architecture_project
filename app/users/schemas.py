@@ -1,7 +1,6 @@
-from typing import Annotated, Optional, Union
+from typing import Optional, Union
 
-from bson import ObjectId
-from pydantic import EmailStr, Field, BaseModel, field_validator, ConfigDict, BeforeValidator
+from pydantic import EmailStr, Field, BaseModel, ConfigDict
 from pydantic_mongo import ObjectIdField
 
 
@@ -16,6 +15,7 @@ class UserCreate(BaseModel):
     is_admin: bool = False
     is_manager: bool = False
 
+
 class UserRegistrate(BaseModel):
     """Registration user info scheme"""
     email: EmailStr  # Авто-валидация формата почты
@@ -23,9 +23,6 @@ class UserRegistrate(BaseModel):
     password: str = Field(..., min_length=6)
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
-
-
-
 
 
 class UserUpdateShort(BaseModel):
@@ -43,6 +40,7 @@ class UserUpdate(UserUpdateShort):
     is_admin: Optional[bool] = Field(None)
     is_manager: Optional[bool] = Field(None)
 
+
 class UserResponseAdm(BaseModel):
     """Admin Response schema"""
     id: ObjectIdField = Field(alias="_id")
@@ -59,6 +57,7 @@ class UserResponseAdm(BaseModel):
         populate_by_name=True,
         protected_namespaces=()
     )
+
 
 class ClientResponseAdm(BaseModel):
     """Client Response schema"""
@@ -80,10 +79,13 @@ class AllUsersResponse(BaseModel):
     page: int
     limit: int
     items: list[UserResponseAdm]
+
+
 #
 class LoginDto(BaseModel):
     login: Union[EmailStr, str] = Field(..., min_length=5, max_length=50)
     password: str = Field(..., min_length=6, max_length=50)
+
 
 class UserPermissionsDto(BaseModel):
     id: ObjectIdField

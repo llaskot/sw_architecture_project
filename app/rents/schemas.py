@@ -5,14 +5,9 @@ from fastapi import HTTPException
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from pydantic_mongo import ObjectIdField
 
-from app.autos.schemas import CarRead
-from app.rents.rent_model import Rent, RentStage
-from app.users.schemas import ClientResponseAdm
-from app.users.user_model import User
-
-
-
-
+from .rent_model import Rent, RentStage
+from app.users import ClientResponseAdm
+from app.autos import CarRead
 
 
 class RentRequest(BaseModel):
@@ -35,13 +30,11 @@ class RentRequest(BaseModel):
         current_time = datetime.now(val.tzinfo) if val.tzinfo else datetime.now()
 
         if val < current_time:
-            # raise ValueError("Start date can not be less than current date")
             raise HTTPException(
                 status_code=409,
                 detail="Start date can not be less than current date"
             )
         return val
-
 
 
 class RentCreate(RentRequest):
@@ -80,9 +73,11 @@ class RentUpdate(RentUpdateRequest):
     updated_by: Optional[ObjectIdField] = Field(None, description="Reference to user collection")
     total_price: Optional[float] = Field(None, description="Total price")
 
+
 class ChangeStage(BaseModel):
     """Change stage schema"""
     comment: Optional[str] = Field(None, description="Manager Comment")
+
 
 class UpdateStage(ChangeStage):
     """Update stage in DB"""
@@ -90,9 +85,11 @@ class UpdateStage(ChangeStage):
     updated_by: ObjectIdField = Field(..., description="Reference to user collection")
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
 class RentRead(Rent):
     car: CarRead | None = None
     client: ClientResponseAdm | None = None
+
 
 class AllOwnRentsResponse(BaseModel):
     total: int

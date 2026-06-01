@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import Optional, Annotated
+from typing import Optional
 
-from bson import ObjectId
 
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, ConfigDict, field_serializer, BeforeValidator, WithJsonSchema
+from pydantic import BaseModel, Field, ConfigDict
 from pydantic_mongo import ObjectIdField
 
 
