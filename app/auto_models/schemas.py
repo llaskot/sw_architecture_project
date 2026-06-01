@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import Field
 from pydantic_mongo import ObjectIdField
 
-from app.auto_models.auto_model_model import CarCategory, AutoModel
+from .auto_model_model import CarCategory, AutoModel
 from app.brands import Brand
 
 

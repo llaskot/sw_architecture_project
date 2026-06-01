@@ -1,13 +1,9 @@
 from fastapi import HTTPException
 
+from .repository import checkup_repo
+from .schemas import CheckupUpdate, CheckupCreate
+from app.rents import rent_repo
 from app.abstracts import AbstractService
-from app.auto_models import auto_model_repo
-from app.auto_models.auto_model_model import CarCategory
-from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate
-from app.brands import brand_repo
-from app.checkup.repository import checkup_repo
-from app.checkup.schemas import CheckupUpdate, CheckupCreate
-from app.rents.repository import rent_repo
 
 
 class CheckupService(AbstractService[CheckupCreate, CheckupUpdate]):

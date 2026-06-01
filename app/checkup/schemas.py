@@ -1,14 +1,12 @@
 from datetime import datetime, timezone
-from enum import Enum
-from typing import Optional, Annotated
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field
 from pydantic_mongo import ObjectIdField
 
-from app.checkup.checkup_model import CheckupModel
-from app.rents.rent_model import Rent
-from app.rents.schemas import RentRead
+from .checkup_model import CheckupModel
+from app.rents import RentRead
 
 
 class CheckupCreate(BaseModel):

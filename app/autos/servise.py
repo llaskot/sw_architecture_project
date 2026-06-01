@@ -1,9 +1,9 @@
 from fastapi import HTTPException
 
+from .repository import car_repo
+from .schemas import CarCreate, CarUpdate, AllCarsResponse
 from app.abstracts import AbstractService
 from app.auto_models import auto_model_repo
-from app.autos.repository import car_repo
-from app.autos.schemas import CarCreate, CarUpdate, AllCarsResponse
 
 
 class CarService(AbstractService[CarCreate, CarUpdate]):

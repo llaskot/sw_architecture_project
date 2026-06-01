@@ -1,14 +1,12 @@
-import json
 from typing import Any
 
 from bson import ObjectId, json_util
 
-from app.abstracts import AbstractRepository
-from app.auto_models.auto_model_model import CarCategory
-from app.autos import Car
-from app.autos.schemas import CarCreate, CarUpdate, CarRead, SortOrder, AllCarsResponse
+from .auto_model import Car
+from .schemas import CarCreate, CarUpdate, CarRead, SortOrder, AllCarsResponse
 from app.database import db
-
+from app.abstracts import AbstractRepository
+from app.auto_models import CarCategory
 
 class CarRepository(AbstractRepository[Car, CarCreate, CarUpdate]):
     def __init__(self):
@@ -123,7 +121,6 @@ class CarRepository(AbstractRepository[Car, CarCreate, CarUpdate]):
             page,
             limit)
         res = await db['cars'].aggregate(pipeline).to_list()
-        # print(json.dumps(res[0]["data"], indent=4, default=json_util.default))
         return AllCarsResponse(
             total=res[0]["total_count"][0]["count"],
             page=page,

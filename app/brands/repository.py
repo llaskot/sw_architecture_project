@@ -1,8 +1,9 @@
 
-from app.brands import Brand
-from app.abstracts.abstract_repository import AbstractRepository
-from app.brands.schemas import BrandCreate, BrandUpdate
+from .brand_model import Brand
+from .schemas import BrandCreate, BrandUpdate
 from app.database import db
+from app.abstracts import AbstractRepository
+
 
 
 class BrandRepository(AbstractRepository[Brand, BrandCreate, BrandUpdate]):

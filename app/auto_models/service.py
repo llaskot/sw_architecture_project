@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from . import auto_model_repo
+from .repository import auto_model_repo
 from .auto_model_model import CarCategory
 from .schemas import AutoModelCreate, AutoModelUpdate
 from app.brands import brand_repo

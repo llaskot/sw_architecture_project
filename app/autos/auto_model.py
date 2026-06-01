@@ -1,6 +1,5 @@
 from typing import Optional
 
-from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict, field_serializer
 from pydantic_mongo import ObjectIdField
 
@@ -37,9 +36,6 @@ class Car(BaseModel):
         arbitrary_types_allowed=True,
         populate_by_name=True
     )
-    #
-    # @field_serializer("id", "model_id")
-    # def serialize_id(self, v: ObjectId, _info):
-    #     return str(v) if v else None
+
 
 

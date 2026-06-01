@@ -1,16 +1,12 @@
 from enum import Enum
-
-from bson import ObjectId
-from fastapi import Query
 from pydantic import BaseModel, Field, ConfigDict, BeforeValidator, WithJsonSchema
 from typing import Annotated, Optional
 
 from pydantic_mongo import ObjectIdField
 
-from app.auto_models.auto_model_model import CarCategory
-from app.auto_models.schemas import AutoModelRead
-from app.autos import Car
-from app.autos.auto_model import Pictures
+from .auto_model import Car, Pictures
+from app.auto_models import AutoModelRead
+
 
 ModelID = Annotated[
     ObjectIdField,

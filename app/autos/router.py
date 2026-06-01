@@ -1,13 +1,12 @@
-from enum import Enum
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Response, Request, HTTPException, Depends, Query
 from pymongo.errors import DuplicateKeyError
 
-from app.auth.dependencies import check_admin
-from app.auto_models.auto_model_model import CarCategory
-from app.autos import CarService
-from app.autos.schemas import CarCreate, CarUpdate, SortOrder, AllCarsResponse
+from app.auth import check_admin
+from app.auto_models import CarCategory
+from .servise import CarService
+from .schemas import CarCreate, CarUpdate, SortOrder, AllCarsResponse
 
 #
 router = APIRouter(prefix="/cars", tags=["Cars"])
@@ -117,7 +116,6 @@ async def get_all(
     except HTTPException as http_ex:
         raise http_ex
     except IndexError :
-        # raise HTTPException(status_code=404, detail=f"nothing found/ {str(e)}") from e
         res = {
             "total": 1,
             "page": 1,

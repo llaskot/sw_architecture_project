@@ -1,21 +1,12 @@
-# from beanie import PydanticObjectId
-from bson import ObjectId
 from fastapi import APIRouter, Response, Request, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
-from app.auth.dependencies import check_manager, check_admin
-#
-from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate, AutoModelRead
-from app.auto_models.service import AutoModelService
-from app.checkup.checkup_model import CheckupModel
-from app.checkup.schemas import CheckupCreate, CheckupUpdate, CheckupRead
-from app.checkup.service import CheckupService
+from .checkup_model import CheckupModel
+from .schemas import CheckupCreate, CheckupUpdate, CheckupRead
+from .service import CheckupService
+from app.auth import check_manager, check_admin
 
-#
-#
 router = APIRouter(prefix="/checkup", tags=["Checkup when returned"])
-
-
 
 
 @router.post("/",  dependencies=[Depends(check_manager)])

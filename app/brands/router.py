@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response, Request, HTTPException, Depends
+from fastapi import APIRouter, Response, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
 from .schemas import BrandUpdate, BrandCreate

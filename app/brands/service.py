@@ -1,6 +1,6 @@
+from .repository import brand_repo
+from .schemas import BrandCreate, BrandUpdate
 from app.abstracts import AbstractService
-from app.brands import brand_repo
-from app.brands.schemas import BrandCreate, BrandUpdate
 
 
 class BrandService(AbstractService[BrandCreate, BrandUpdate]):
