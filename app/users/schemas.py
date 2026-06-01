@@ -1,6 +1,7 @@
+import re
 from typing import Optional, Union
 
-from pydantic import EmailStr, Field, BaseModel, ConfigDict
+from pydantic import EmailStr, Field, BaseModel, ConfigDict, field_validator
 from pydantic_mongo import ObjectIdField
 
 
@@ -8,21 +9,37 @@ class UserCreate(BaseModel):
     """Creation by admin scheme"""
     email: EmailStr  # Авто-валидация формата почты
     login: str = Field(..., min_length=6, max_length=20)
-    password: str = Field(..., min_length=6)
+    password: str = Field(
+        ...,
+        min_length=8,
+    )
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
     active: bool = True
     is_admin: bool = False
     is_manager: bool = False
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", v):
+            raise ValueError("Password must contain lowercase, uppercase and a digit")
+        return v
+
 
 
 class UserRegistrate(BaseModel):
     """Registration user info scheme"""
     email: EmailStr  # Авто-валидация формата почты
     login: str = Field(..., min_length=6, max_length=20)
-    password: str = Field(..., min_length=6)
+    password: str = Field(..., min_length=8)
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", v):
+            raise ValueError("Password must contain lowercase, uppercase and a digit")
+        return v
 
 
 class UserUpdateShort(BaseModel):

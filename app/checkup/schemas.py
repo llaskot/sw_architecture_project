@@ -9,14 +9,17 @@ from .checkup_model import CheckupModel
 from app.rents import RentRead
 
 
-class CheckupCreate(BaseModel):
+class CheckupRequest(BaseModel):
     """Registration scheme"""
     rent_id: ObjectIdField = Field(..., description="Exists rent ID")
     summary: str = Field(..., min_length=1)
     notis: str = Field(..., min_length=0)
     price: float = Field(..., ge=0)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class CheckupCreate(CheckupRequest):
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class CheckupUpdate(BaseModel):
     """Update scheme"""

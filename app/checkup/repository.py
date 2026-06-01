@@ -1,3 +1,6 @@
+from bson import ObjectId
+
+from app.checkup.schemas import CheckupRead
 from .checkup_model import CheckupModel
 from .schemas import CheckupCreate, CheckupUpdate, CheckupRead
 from app.database import db
@@ -33,6 +36,18 @@ class CheckupRepository(AbstractRepository[CheckupModel, CheckupCreate, CheckupU
                 }
             }
         ]
+
+    async  def get_checkup_by_rent(self, rent_id: str) -> CheckupRead | None:
+        pipeline = getattr(self, "read_pipeline", None)
+
+        match_stage = {"$match": {"rent_id": ObjectId(rent_id)}}
+        if pipeline:
+            cursor = self.collection.aggregate([match_stage] + pipeline)
+            result = await cursor.to_list(length=1)
+            document = result[0] if result else None
+        else:
+            document = await self.collection.find_one(match_stage["$match"])
+        return self.response_model.model_validate(document)
 
 
 checkup_repo = CheckupRepository()
