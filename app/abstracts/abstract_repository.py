@@ -1,10 +1,9 @@
 from typing import Generic, TypeVar, Type, List, Optional, Any
 
 from pydantic import BaseModel
-from fastapi import HTTPException
 from pymongo.asynchronous.collection import ReturnDocument
 
-from app.abstracts.abstract_chemas import AbstrDelete
+from .abstract_chemas import AbstrDelete
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection

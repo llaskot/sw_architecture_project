@@ -3,11 +3,9 @@ from typing import Optional, Annotated
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
-from .schemas import UserCreate, UserResponseAdm, UserUpdate, UserUpdateShort, AllUsersResponse
+from .schemas import UserCreate, UserResponseAdm, UserUpdate, UserUpdateShort, AllUsersResponse, UserPermissionsDto
 from .service import UserService
-from ..auth.dependencies import check_admin, check_manager, check_token
-from ..auth.schemas import UserPermissionsDto
-from ..autos.schemas import SortOrder
+from app.auth import check_admin, check_manager, check_token
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

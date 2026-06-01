@@ -2,7 +2,7 @@ from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from .service import AuthService
-from .schemas import UserPermissionsDto
+from app.users import UserPermissionsDto
 
 security_token = HTTPBearer()
 

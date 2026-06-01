@@ -4,13 +4,11 @@ from fastapi import APIRouter, Response, Request, HTTPException, Depends, Query,
 from pymongo.errors import DuplicateKeyError
 
 from app.auth.dependencies import check_admin, check_token, check_manager
-from app.auth.schemas import UserPermissionsDto
 from app.autos.schemas import SortOrder
-from app.brands.schemas import BrandUpdate, BrandCreate
-from app.brands.service import BrandService
 from app.rents.rent_model import RentStage
 from app.rents.schemas import RentCreate, RentRead, RentRequest, RentUpdateRequest, ChangeStage, AllOwnRentsResponse
 from app.rents.service import RentService
+from app.users import UserPermissionsDto
 
 router = APIRouter(prefix="/rent", tags=["Rents"])
 

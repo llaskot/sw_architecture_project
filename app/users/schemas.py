@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Union
 
 from bson import ObjectId
 from pydantic import EmailStr, Field, BaseModel, field_validator, ConfigDict, BeforeValidator
@@ -81,9 +81,17 @@ class AllUsersResponse(BaseModel):
     limit: int
     items: list[UserResponseAdm]
 #
-# class UserResponse(UserResponseBasic):
-#     """Полный вариант: всё то же самое + конфиденциальные данные"""
-#     email: EmailStr
-#     login: str
-#
+class LoginDto(BaseModel):
+    login: Union[EmailStr, str] = Field(..., min_length=5, max_length=50)
+    password: str = Field(..., min_length=6, max_length=50)
 
+class UserPermissionsDto(BaseModel):
+    id: ObjectIdField
+    active: bool
+    is_admin: bool
+    is_manager: bool
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+        from_attributes=True
+    )

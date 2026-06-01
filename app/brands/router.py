@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Response, Request, HTTPException, Depends
 from pymongo.errors import DuplicateKeyError
 
-from app.auth.dependencies import check_admin, check_manager
-from app.auth.schemas import UserPermissionsDto
-from app.brands.schemas import BrandUpdate, BrandCreate
-from app.brands.service import BrandService
+from .schemas import BrandUpdate, BrandCreate
+from .service import BrandService
+from app.auth import check_admin, check_manager
+from app.users import UserPermissionsDto
 
 router = APIRouter(prefix="/brand", tags=["Brands"])
 

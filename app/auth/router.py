@@ -1,12 +1,12 @@
 from fastapi import  Response, Request, HTTPException
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from fastapi import APIRouter
-from .schemas import LoginResponse, ConfirmationCode, LoginDto, RegisterResponse, PassRestore, ChangePassword, \
+from .schemas import LoginResponse, ConfirmationCode,  RegisterResponse, PassRestore, ChangePassword, \
     ConfirmResponse
 
 from .service import AuthService
 from app.mailer import  confirm_mail
-from app.users import UserRegistrate
+from app.users import UserRegistrate, LoginDto
 
 router = APIRouter(prefix="/auth", tags=["Authentification"])
 

@@ -1,10 +1,10 @@
 from fastapi import HTTPException
 
-from app.abstracts import AbstractService
-from app.auto_models import auto_model_repo
-from app.auto_models.auto_model_model import CarCategory
-from app.auto_models.schemas import AutoModelCreate, AutoModelUpdate
+from . import auto_model_repo
+from .auto_model_model import CarCategory
+from .schemas import AutoModelCreate, AutoModelUpdate
 from app.brands import brand_repo
+from app.abstracts import AbstractService
 
 
 class AutoModelService(AbstractService[AutoModelCreate, AutoModelUpdate]):

@@ -1,6 +1,5 @@
 from typing import Generic, TypeVar, Type, Any
 
-# from beanie import PydanticObjectId
 from fastapi import HTTPException
 from pydantic import BaseModel
 from bson import ObjectId

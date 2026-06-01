@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Annotated, Optional
+from typing import  Optional
 
-from pydantic import BaseModel, field_serializer, ConfigDict, Field
+from pydantic import BaseModel,  ConfigDict, Field
 from pydantic_mongo import ObjectIdField
 
 

@@ -1,19 +1,13 @@
-from enum import Enum
-from typing import Optional, Annotated
+from typing import Optional
 
-from bson import ObjectId
-from pydantic import BaseModel, ConfigDict, BeforeValidator, WithJsonSchema
+from pydantic import BaseModel, ConfigDict
 from pydantic import Field
 from pydantic_mongo import ObjectIdField
 
 from app.auto_models.auto_model_model import CarCategory, AutoModel
 from app.brands import Brand
 
-# BrandID = Annotated[
-#     ObjectIdField,
-#     BeforeValidator(lambda x: ObjectIdField(x) if ObjectIdField.is_valid(str(x)) else x),
-#     WithJsonSchema({"type": "string", "example": "69dcdad6fde5b719337b0dc3"})
-# ]
+
 
 
 class AutoModelCreate(BaseModel):
@@ -21,7 +15,6 @@ class AutoModelCreate(BaseModel):
     brand_id: ObjectIdField = Field(..., description="Exists brand ID")
     name: str = Field(..., min_length=1)
     description: str = Field(..., min_length=6)
-    # category: CarCategory = Field(..., description="Category of the car")
     category: CarCategory = Field(
         ...,
         description="Allowed: economy, standard, business, premium, luxury, suv",

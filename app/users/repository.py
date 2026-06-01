@@ -1,10 +1,9 @@
 from bson import ObjectId
 
 from app.abstracts import AbstractRepository
-from app.auth.schemas import LoginDto
 from app.database import db
-from app.users.schemas import UserCreate, UserUpdate, AllUsersResponse, UserResponseAdm
-from app.users.user_model import User
+from .schemas import UserCreate, UserUpdate, AllUsersResponse, UserResponseAdm, LoginDto
+from .user_model import User
 
 
 class UserRepository(AbstractRepository[User, UserCreate, UserUpdate]):

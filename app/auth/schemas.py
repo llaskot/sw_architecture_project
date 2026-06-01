@@ -1,7 +1,6 @@
 from typing import Union, Optional
 
-from pydantic import EmailStr, Field, BaseModel, ConfigDict
-from pydantic_mongo import ObjectIdField
+from pydantic import EmailStr, Field, BaseModel
 
 from app.users import UserResponseAdm
 
@@ -22,23 +21,6 @@ class PassRestore(BaseModel):
     """Restore password request scheme"""
     login: Union[EmailStr, str] = Field(..., min_length=5, max_length=50)
 
-
-class LoginDto(BaseModel):
-    login: Union[EmailStr, str] = Field(..., min_length=5, max_length=50)
-    password: str = Field(..., min_length=6, max_length=50)
-
-
-
-class UserPermissionsDto(BaseModel):
-    id: ObjectIdField
-    active: bool
-    is_admin: bool
-    is_manager: bool
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        populate_by_name=True,
-        from_attributes=True
-    )
 
 class RegisterResponse(BaseModel):
     success: bool

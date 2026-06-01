@@ -11,8 +11,8 @@ from bson import ObjectId
 from cryptography.fernet import Fernet
 from fastapi import HTTPException, Response
 
-from .schemas import ConfirmationCode, LoginDto, UserPermissionsDto, PassRestore, ChangePassword
-from app.users import UserRegistrate, UserCreate, User
+from .schemas import ConfirmationCode, PassRestore, ChangePassword
+from app.users import UserRegistrate, UserCreate, User, LoginDto, UserPermissionsDto
 from app.core import settings
 from app.users import user_repo as us_repo
 

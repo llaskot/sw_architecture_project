@@ -3,16 +3,15 @@ from typing import Any
 
 from bson import ObjectId
 from fastapi import HTTPException
-from watchfiles import awatch
 
 from app.abstracts import AbstractService
-from app.auth.schemas import UserPermissionsDto
 from app.autos import car_repo as cr, Car
 from app.autos.repository import CarRepository
 from app.autos.schemas import CarUpdate
 from app.rents.rent_model import Rent, RentStage
 from app.rents.repository import rent_repo as rr, RentRepository
 from app.rents.schemas import RentCreate, RentUpdate, RentRead, RentRequest, RentUpdateRequest, ChangeStage, UpdateStage
+from app.users import UserPermissionsDto
 from app.users.repository import user_repo as ur, UserRepository
 
 

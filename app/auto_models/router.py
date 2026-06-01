@@ -5,9 +5,7 @@ from .schemas import AutoModelCreate, AutoModelUpdate
 from .service import AutoModelService
 
 from app.auth import check_admin, check_manager
-from app.auth import UserPermissionsDto
-
-
+from app.users import UserPermissionsDto
 
 router = APIRouter(prefix="/models", tags=["Auto Model"])
 

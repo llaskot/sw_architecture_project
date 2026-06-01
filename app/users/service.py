@@ -1,9 +1,8 @@
 import bcrypt
 
 from app.abstracts import AbstractService
-from app.auth.schemas import UserPermissionsDto
 from app.users.repository import user_repo
-from app.users.schemas import UserCreate, UserUpdate
+from .schemas import UserCreate, UserUpdate, UserPermissionsDto
 
 
 class UserService(AbstractService[UserCreate, UserUpdate]):
