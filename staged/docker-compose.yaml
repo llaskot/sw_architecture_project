@@ -15,9 +15,9 @@ services:
     # Не даем бэкенду стартовать, пока база реально не будет готова
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
   staged_app:
     build:
@@ -40,9 +40,11 @@ services:
     build:
       context: ..
       dockerfile: staged/frontend.Dockerfile
+      no_cache: true
       args:
         - FRONTEND_GIT_URL=${FRONTEND_GIT_URL}
         - VITE_API_URL=/api # ВАЖНО: заставляем фронт стучаться в /api
+    pull_policy: build
     container_name: frontend_staged
     restart: always
     ports:
