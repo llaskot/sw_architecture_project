@@ -18,6 +18,8 @@ async def setup_db():
     await db['cars'].create_index("plate_number", unique=True)
     await db['users'].create_index("login", unique=True)
     await db['users'].create_index("email", unique=True)
+    await db['checkup'].create_index("rent_id", unique=True)
+
 
     # Проверка и создание первого админа
     if all([settings.first_admin_login, settings.first_admin_pass, settings.first_admin_mail]):

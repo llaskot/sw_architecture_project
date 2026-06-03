@@ -1,4 +1,5 @@
 from bson import ObjectId
+from fastapi import HTTPException
 
 from app.checkup.schemas import CheckupRead
 from .checkup_model import CheckupModel
@@ -41,12 +42,11 @@ class CheckupRepository(AbstractRepository[CheckupModel, CheckupCreate, CheckupU
         pipeline = getattr(self, "read_pipeline", None)
 
         match_stage = {"$match": {"rent_id": ObjectId(rent_id)}}
-        if pipeline:
-            cursor = self.collection.aggregate([match_stage] + pipeline)
-            result = await cursor.to_list(length=1)
-            document = result[0] if result else None
-        else:
-            document = await self.collection.find_one(match_stage["$match"])
+        cursor = self.collection.aggregate([match_stage] + pipeline)
+        result = await cursor.to_list(length=1)
+        document = result[0] if result else None
+        if not document:
+            raise HTTPException(status_code=404, detail="Checkup not found")
         return self.response_model.model_validate(document)
 
 

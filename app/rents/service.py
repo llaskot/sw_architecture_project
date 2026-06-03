@@ -166,7 +166,7 @@ class RentService(AbstractService[RentCreate, RentUpdate]):
             stage=stage
         )
         res = await self.repo.update(ObjectId(rent_id), changes)
-        return res
+        return await self.repo.get_by_id(ObjectId(rent_id))
 
     async def get_stages(self):
         return [stage.value for stage in RentStage]

@@ -9,6 +9,7 @@ from .service import RentService
 from app.users import UserPermissionsDto
 from app.auth import check_admin, check_token, check_manager
 from app.autos import SortOrder
+from app.mailer import update_stage
 
 router = APIRouter(prefix="/rent", tags=["Rents"])
 
@@ -125,6 +126,7 @@ async def delete(rent_id: str):
 
 
 @router.put("/{rent_id}/{stage}")
+@update_stage
 async def change_stage(rent_id: str,
                        stage: Annotated[RentStage, Path(description="Select stage")],
                        body: ChangeStage,

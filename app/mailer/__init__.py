@@ -1,6 +1,6 @@
-from .decorators import  confirm_mail
+from .decorators import  confirm_mail, update_stage
 
 
 __all__ = [
-    "confirm_mail"
+    "confirm_mail", "update_stage"
 ]

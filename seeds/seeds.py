@@ -3,86 +3,6 @@ import bcrypt
 
 
 
-# async def seed(iterations: int = 5):
-#     # 1. Подключаемся к локальной Монге
-#     # client = AsyncIOMotorClient("mongodb://root:supersecretpassword@localhost:27017/?authSource=admin")
-#
-#     # await client.drop_database("rents_db")
-#
-#     client = AsyncIOMotorClient(settings.database_url)
-#     db_name = settings.mongo_db
-#     await client.drop_database(db_name)
-#     print("Database cleared")
-#
-#     brand_serv = BrandService()
-#     model_serv = AutoModelService()
-#     car_serv = CarService()
-#     user_serv = UserService()
-#     remt_serv = RentService()
-#
-#     for _ in range(iterations):
-#         user_dto = UserCreate(
-#             email=fake.unique.email(),
-#             login=fake.unique.user_name() + '_usr',
-#             password="Aa111111",
-#             first_name=fake.first_name(),
-#             last_name=fake.last_name(),
-#         )
-#         new_user = await user_serv.create(user_dto)
-#         print(new_user)
-#
-#         brand_dto = BrandCreate(
-#             name=fake.unique.company(),
-#             country=fake.country(),
-#             description=fake.sentence(nb_words=10)
-#         )
-#
-#         new_brand = await brand_serv.create(brand_dto)
-#         print(new_brand)
-#
-#         for i in range(10):
-#             dto = AutoModelCreate(
-#                 brand_id=new_brand.id,
-#                 name=fake.word().capitalize() + random.choice([" X", " Series", " Pro", " GT"]),
-#                 description="High quality vehicle with " + fake.bs(),
-#                 category=random.choice(list(CarCategory))
-#             )
-#             new_model = await model_serv.create(dto)
-#             print(new_model)
-#
-#
-#             car_dto = CarCreate(
-#                 model_id=new_model.id,
-#                 # VIN должен быть ровно 17 символов (цифры + заглавные буквы)
-#                 vin="".join(random.choices(string.ascii_uppercase + string.digits, k=17)),
-#                 plate_number=fake.unique.bothify(text='?###??###').upper(),
-#                 year=random.randint(2015, 2024),
-#                 color=fake.color_name(),
-#                 mileage=random.randint(0, 100000),
-#                 price_per_day=float(random.randint(3000, 20000))
-#             )
-#
-#             car = await car_serv.create(car_dto)
-#             print(car)
-#
-#
-#         rent_dto = RentRequest(
-#             car_id=car.id,
-#             driver=False,
-#             user_dock="".join(random.choices(string.ascii_uppercase + string.digits, k=8)),
-#             days_qty=random.randint(2, 60),
-#             start_date=fake.date_time_between(start_date='+1d', end_date='+1m')
-#         )
-#
-#         user_payload = UserPermissionsDto(
-#             id=new_user.id,
-#             active=True,
-#             is_admin=False,
-#             is_manager=False,
-#         )
-#         new_rent = await remt_serv.create_rent(rent_dto, user_payload)
-#         print(new_rent)
-
 
 
 async def seed(iterations: int = 5):
@@ -92,27 +12,31 @@ async def seed(iterations: int = 5):
     await client.drop_database(db_name)
     print("Database cleared")
 
+    from app.database import setup_db
+    await setup_db()
+    print("Indexes and first admin restored")
+
     brand_serv = BrandService()
     model_serv = AutoModelService()
     car_serv = CarService()
     user_serv = UserService()
     remt_serv = RentService()
 
-    pwd_bytes = settings.first_admin_pass.encode('utf-8')
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
+    # pwd_bytes = settings.first_admin_pass.encode('utf-8')
+    # salt = bcrypt.gensalt()
+    # hashed_password = bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
-    await db["users"].insert_one({
-        "email": settings.first_admin_mail,
-        "login": settings.first_admin_login,
-        "password": hashed_password,
-        "first_name": settings.first_admin_name or "Admin",
-        "last_name": "Admin",
-        "active": True,
-        "is_admin": True,
-        "is_manager": False
-    })
-    print("🚀 First admin user created via database setup")
+    # await db["users"].insert_one({
+    #     "email": settings.first_admin_mail,
+    #     "login": settings.first_admin_login,
+    #     "password": hashed_password,
+    #     "first_name": settings.first_admin_name or "Admin",
+    #     "last_name": "Admin",
+    #     "active": True,
+    #     "is_admin": True,
+    #     "is_manager": False
+    # })
+    # print("🚀 First admin user created via database setup")
 
 
 
