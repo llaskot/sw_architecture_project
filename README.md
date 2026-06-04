@@ -1,7 +1,45 @@
-
 # 🚀 FastAPI Learning Project
 
 A clean and modern starter project using **FastAPI**, **Pydantic**, and **uv** for package management.
+
+---
+
+## 🐳 Full Application Deployment (Staged / Docker Compose)
+
+This project includes a complete Docker Compose setup in the `staged/` directory. It automatically spins up the MongoDB database, the FastAPI backend, and a React frontend (served via Nginx). The frontend is built dynamically by pulling the latest code from its repository.
+
+### 1. Configure Environment
+First, create your environment variables file using the provided example:
+```bash
+cp staged/.env.example staged/.env
+```
+*(Open `staged/.env` and review the variables. Ensure `VITE_API_URL=/api` is set correctly for Nginx routing).*
+
+### 2. Build and Run
+Navigate to the `staged/` directory and start the services. 
+*Note: The `docker-compose.yaml` is configured to always pull the latest frontend code and build it without using the cache.*
+```bash
+cd staged
+docker compose up -d
+```
+
+### 3. Access the Services
+Once all containers are healthy and running, you can access the project here:
+* 🖥️ **Frontend (UI):** http://localhost:8050
+* 📖 **Backend API Docs (Swagger):** http://localhost:8080/docs
+* 🗄️ **MongoDB:** localhost:27018
+
+### 4. Stopping the Application
+To stop the application and clean up the containers:
+```bash
+docker compose down
+```
+*(Add the `-v` flag if you want to completely wipe the database volume).*
+
+---
+
+
+###   DEv MODE
 
 ## 🛠 Prerequisites
 
@@ -29,17 +67,18 @@ Before you begin, ensure you have **Python 3.13+** installed on your system.
 
 **Windows (PowerShell):**
 ```powershell
-powershell -c "ir | iex" (irm [https://astral.sh/uv/install.ps1](https://astral.sh/uv/install.ps1))
+powershell -c "ir | iex" (irm https://astral.sh/uv/install.ps1)
 ```
 **macOS / Linux::**
-```Bash
-curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | sh
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 1. **Clone the repository:**
    ```bash
    git clone git@github.com:llaskot/sw_architecture_project.git
    cd pashnev_project
+   ```
    
 # 1.1. Build and run Mongo DB in container
 ```commandline
@@ -86,4 +125,6 @@ pip install
 ```
 
 # 5. Run the server
+```commandline
 fastapi dev main.py
+```
